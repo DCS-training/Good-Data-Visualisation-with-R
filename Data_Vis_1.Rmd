@@ -40,7 +40,7 @@ Well, simply put: it provides structure and guidance to my code. It helps me cre
 
 So I've started backwards with the why to the **grammar of graphics**. Time to move towards the **what**. To use a metaphor, it is a recipe template for data visualisation. It provides us with an outline of the core ingredients/layers, and guidance on where and when to add them. What we get is a lovely casserole of a data visualisation. 
 
-![Grammar of graphics](/Users/Rhys Davies/OneDrive - University of Edinburgh/Documents/CDCS/Data Vis\Casserole.png)
+![Grammar of graphics](casserole.png)
 
 Today we will work through each of the layers, one by one. The aim of this is to highlight how the grammar of graphics is used. (We may also show how sometimes we can bend the rules).
 
