@@ -28,7 +28,7 @@ The main function workhorse for our datavis today will be `ggplot`. This can be 
 
 So what is the grammar of graphics? And why is it relevant for creating data visualisation? 
 
-![Grammar of graphics](/Users/Rhys Davies/OneDrive - University of Edinburgh/Documents/CDCS/Data Vis\RVisualisation.png)
+![Grammar of graphics](RVisualisation.png)
 *****
 
 ## Why is the Grammar of Graphics relevant for data visualisation?
