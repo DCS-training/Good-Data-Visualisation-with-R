@@ -28,7 +28,9 @@ The main function workhorse for our datavis today will be `ggplot`. This can be 
 
 So what is the grammar of graphics? And why is it relevant for creating data visualisation? 
 
-![Grammar of graphics](RVisualisation.png)
+
+![](RVisualisation.png)
+
 *****
 
 ## Why is the Grammar of Graphics relevant for data visualisation?
@@ -381,6 +383,18 @@ boxplot(iris$Sepal.Length) # using $ sign to select a specific variable.
 boxplot(iris) #not using $ sign to have boxplots for all variables. Be careful as this might not always work - especially when working with large datasets.
 
 hist(iris$Sepal.Width)
+
+# Using pairs.panels function from psych
+#install.packages("psych")
+library(psych)
+pairs.panels(iris, # data 
+             bg=c("blue", "red", "yellow")[factor(iris$Species)], # setting colours for factors
+             digits = 3, # setting digits
+             method = "pearson", # setting corr method
+             pch = 21, # plot character
+             stars = TRUE, #corr stars
+             lm = TRUE #linear method
+             )
 ```
 
 We can also use base-R to help us quickly check the assumptions underlying our analyses.
