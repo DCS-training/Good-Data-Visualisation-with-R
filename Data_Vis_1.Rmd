@@ -373,6 +373,7 @@ plot_a +
 
 And there we have it! All the layers, to our highly regarded expectations of what our plot should look like. But how do we export it?
 
+Right click on our plot - click save as (or copy). And voila! Plot is exported.
 
 ## Bonus Base R detour
 
