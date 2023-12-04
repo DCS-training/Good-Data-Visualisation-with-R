@@ -230,11 +230,15 @@ ggplot( aes(x = reorder(island, n),
       group_by( island, species) %>% 
       summarise(n = n()) %>% na.omit() %>%
       ggplot( aes(x = reorder(island, n), 
-                  y = n
+                  y = n,
                  )) + 
       geom_line(aes(group = island)) + # creating line in between the point for each island
-     geom_point(aes(color = species), size = 5, alpha = .7) +# colouring each point by the species
-      coord_flip()
+     geom_point(aes(color = species), size = 6) +# colouring each point by the species 
+  geom_text(aes(label = n), size = 2.5) +
+  scale_y_continuous(limits = c(0, 150)) +
+      coord_flip()+
+  theme(legend.position = "right")+
+  labs(color = "")
 
 ```
 
@@ -276,11 +280,11 @@ Now that we have identified the most efficent brand of car, can we find the most
   data <- mpg %>% mutate(
     manufacturer = as.factor(manufacturer),
     model = as.factor(model)
-  ) %>% group_by(...) %>%
+  ) %>% group_by(model) %>%
     summarise(avg_hwy = mean(hwy))
   data
   
-  ggplot(data, aes(fill = avg_hwy, area = avg_hwy, label = ... )) +
+  ggplot(data, aes(fill = avg_hwy, area = avg_hwy, label = model )) +
     geom_treemap() +
     geom_treemap_text(colour = "white",
                       place = "centre",
