@@ -27,12 +27,16 @@ We will also cover some basic data manipulation, so that you have the tools to g
 
 So lets's get going! But before we get plotting, we will first inspect our data and understand what it is we might want to plot. 
 
+For the majority of this session, we will be working the Palmer Penguins data set (https://github.com/allisonhorst/palmerpenguins/tree/main). Think of it as the next step up for the Iris that we worked with last week ;)
+
 ```{r penguins}
 
 ?penguins
 summary(penguins)
 head(penguins)
 ```
+
+![The Penguins](lter_penguins.png)
 
 Last week we focused mostly on plotting numeric Vs numeric data. But sometimes we categorically have to consider categories (sorry not sorry). This opens up whole new avenues and options for us, as we can start to consider representing percentages, means, medians, counts, and a whole bunch of other scenarios. We can also use the grammar approach of ggplot to layer different visualisations. Today we will be looking at our penguin dataset to compare between species, island and sex, and how these relate to penguin bodyweight. Let's have a look through our examples below:
 
