@@ -35,6 +35,7 @@ The following pacakges will need installing for this workshop:
 
 * tidyverse
 * jtools
+* psych
 * palmerpenguins
 * gt
 
