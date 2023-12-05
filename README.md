@@ -36,6 +36,7 @@ The following pacakges will need installing for this workshop:
 * tidyverse
 * jtools
 * palmerpenguins
+* gt
 
 Useful reading:
 A layered grammar of graphics - Hadley Wickham https://www.tandfonline.com/doi/epdf/10.1198/jcgs.2009.07098?needAccess=true
