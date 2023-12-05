@@ -375,6 +375,7 @@ And there we have it! All the layers, to our highly regarded expectations of wha
 
 Right click on our plot - click save as (or copy). And voila! Plot is exported.
 
+
 ## Bonus Base R detour
 
 This is a short detour - but R does have some built in ready made data vis functions. These aren't pretty, but they are very useful for quick and easy exploration of our variables.
@@ -407,7 +408,164 @@ summary(m) # Checking summary of analysis
 plot(m) # plotting the residuals to check model assumptions
 
 ```
+## Bonus material (if time)
+### Automated plots, and fancy tables
 
+This next section is inspired from a blog lesson from: https://rfortherestofus.com/2023/10/ggplots-in-gt-tables 
+
+An often overlooked aspect of data visualisation is table creation. This can be awkward when jumping into R, as we lose the ability to click, drage, and merge in the ways we are used to. But thankfully, there are packages that can be used to facilitate this. In this bonus section, we learn to do the following:
+
+* Create a summary statistics table.
+* Make the table pretty.
+* Include distribution plots into the table.
+* Create a function to automate the the distribution plots (this can be used in other scenario's as well).
+
+Let's get going! We'll work with the `gt` package this time, and stick with the `Iris` dataset. Let's imagine we want to create a summary table of the **Petal Length** across the iris **Species**.
+
+### Basic table
+
+```{r tables}
+#install.packages("gt")
+library(gt)
+
+# Summary table - basic
+Iris_table <- iris %>% 
+  group_by(Species) %>%
+  summarise(
+    min = min(Petal.Length),
+    mean = mean(Petal.Length),
+    max = max(Petal.Length),
+    SD = sd(Petal.Length)
+  )
+
+Iris_table
+
+```
+
+### Pretty table
+
+```{r}
+
+Iris_table %>% 
+  gt() %>%
+  tab_spanner(
+    label = 'Iris Petal Length', #title for merged header
+    columns = -Species #Not to include species
+  ) %>%
+  cols_label_with(fn = str_to_title) %>% #changing start of each word to upper case
+  fmt_number(decimals = 2) %>% # restricting to 2 decimal places
+  cols_align('left', columns = Species) # left aliging Species column to improve readability
+
+```
+
+### Getting funky with plots
+
+So we now have a pretty table that gives us an approximation of the distribution. But how can we improve this? With our good old friend data visualisation. 
+
+These next steps will be focused on creating a distribution plot for each species, which we can then include into the table. This will require some data manipulation for each species... but we're gonna learn a trick to streamline this process for us.
+
+```{r}
+
+Setosa_data <- iris %>% 
+  filter(Species == "setosa")
+
+Setosa_data %>% 
+  ggplot(aes(x= Petal.Length, y = Species)) +
+  geom_violin(fill = "#FF00CC")
+
+Setosa_data %>% 
+  ggplot(aes(x= Petal.Length, y = Species)) +
+  geom_violin(fill = "#FF00CC") +
+  theme_void() # using theme_void() to declutter plot, so that it fits nicely in table.
+
+```
+
+So above is the code for our `setosa` species. Thankfully, there are only 3 species in this data set. But what if we a larger dataset? That would involve a whole load of copy and pasting. It would also make it messy to fit the code into our table. 
+
+To get around this problem, we are going to create function that will automate the process for us.
+
+### Plotting function
+
+```{r plot_function}
+
+# Step 1 - creating a function
+plot_violin_species <- function(my_species) { # naming our input for the function
+  full_range <- iris %>%
+    pull(Petal.Length) %>%
+    range(na.rm = TRUE) # creating a range variable 
+  
+  iris %>% # specifiying the commands of the function
+    filter(Species == my_species) %>%
+    ggplot(aes(x = Petal.Length, y = Species)) +
+    geom_violin(fill = '#FF00CC') +
+    theme_minimal() +
+    coord_cartesian(xlim = full_range) # adding this so every distribution is set to the same scale 
+}
+
+# Step 2 - testing the function
+
+plot_violin_species(my_species = "setosa")
+plot_violin_species(my_species = "versicolor")
+plot_violin_species(my_species = "virginica")
+
+ 
+```
+
+### Adding plots to the table
+
+Now that we have our automated plot code, we can work to add it into our pretty summary table. This will include some function creating again. It will also require us to transform our `ggplot` items into `image` formats - as `gt()` doesn't know what to do with `ggplot` items. Thankfully, all that's needed is a line of code!
+
+```{r}
+fancy_table <- Iris_table %>%
+  mutate(Distribution = Species) %>%
+  gt() %>% 
+  tab_spanner(
+    label = 'Iris Petal Width', #title for merged header
+    columns = -Species #Not to include species
+  ) %>%
+  cols_label_with(fn = str_to_title) %>% #changing start of each word to upper case
+  fmt_number(decimals = 2) %>% # restricting to 2 decimal places
+  cols_align('left', columns = Species) %>% 
+  text_transform(
+    locations = cells_body(columns = 'Distribution'),
+    fn = function(column) {
+      map(column, plot_violin_species) %>% 
+        ggplot_image(height = px(40), aspect_ratio = 2.5)
+    }
+  ) 
+
+fancy_table
+
+```
+
+So there's a few complicated things going on here. But here's our approach to simplify:
+
+* First, text_transform() needs to know the locations of the cells that we want to transform. This information comes from cells_body(columns = 'Distribution') .
+
+* Second, text_transform() needs a function that takes the whole data that is stored in the “Distribution” column and generates images from this. That function is defined in the last segment of the code above (the `function(column) {...` part of the code.
+
+```{r }
+
+function(column) {
+  map(column, plot_violin_species) %>%
+    ggplot_image(height = px(50), aspect_ratio = 3) # we can play with the numbers here to size our plots
+}
+
+```
+
+This function does two things:
+
+1.  map() applies plot_violin_species() for every species. This will give us a list of ggplot-objects . This is not what text_transform() wants. It wants images.
+
+2. the list of ggplot-objects is turned into images with the convenient ggplot_image() function from gt .
+
+The end result is our fancy table with the plots included:
+
+```{r fancy_table}
+
+fancy_table
+
+```
 
 ## Playtime 
 
@@ -425,25 +583,77 @@ library(palmerpenguins)
          aes(x = ... , y = ... , color... )) +
     geom_point() 
   
+   ggplot(penguins,
+         aes(x = ... , y = ... , color... )) +
+    geom_point() +
+     theme(legend.position = "...") +
+     labs(x = "...",
+          y = "...",
+          title = "...")
+  
   # Regression line
+   
+   ggplot(penguins,
+         aes(x = ... , y = ... , color = )) +
+    geom_point(alpha = ...)
+   
+   
   ggplot(penguins,
          aes(x = ... , y = ... , color = )) +
     geom_point(alpha = ...) +
     geom_smooth(method = "lm")
-    facet_wrap(~...)
+    facet_wrap(~...) +
+     theme(legend.position = "...") +
+     labs(x = "...",
+          y = "...",
+          title = "...")
   
     
     # Splitting by category
+    ggplot(penguins,
+         aes(x = ... , y = ... , color = )) +
+    geom_point()
+    
   ggplot(penguins,
          aes(x = ... , y = ... , color = )) +
     geom_point() +
-    facet_wrap(~...)
+    facet_wrap(~...)+
+     theme(legend.position = "...") +
+     labs(x = "...",
+          y = "...",
+          title = "...")
   
   
   # Splitting by 2 categories
   ggplot(penguins,
          aes(x = ... , y = ... , color = )) +
     geom_point() +
-    facet_grid(~... , ~...)
+    facet_grid(~... , ~...) +
+     theme(legend.position = "...") +
+     labs(x = "...",
+          y = "...",
+          title = "...")
+  
+  
+  # Automated Penguin Plot (movie script in production...)
+  ## Please use this as a template to experiment with! Change the variables, and see what you can make of it
+  
+  plot_penguin <- function(my_species) {
+  penguins %>%
+      na.omit() %>%
+    filter(species == my_species) %>% # Try replacing the ggplot code from with the ggplot code here! 
+    ggplot(aes(x = bill_length_mm, y = bill_depth_mm, 
+               color = sex)) +
+    geom_point() +
+    geom_smooth(method = "lm") +
+    theme_minimal() +
+      theme(legend.position = "bottom") +
+      labs(x = "Bill Length (in mm)",
+           y = "Bill Depth (in mm)",
+           title = my_species) # When copy and pasting, make sure to keep the title `my_species` 
+  }
+  
+  # Species names: Adelie , Chinstrap , Gentoo - just copy and paste into the function below!
+  plot_penguin(my_species = "Gentoo")
 
 ```
