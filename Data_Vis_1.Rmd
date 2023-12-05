@@ -497,9 +497,11 @@ plot_violin_species <- function(my_species) { # naming our input for the functio
   iris %>% # specifiying the commands of the function
     filter(Species == my_species) %>%
     ggplot(aes(x = Petal.Length, y = Species)) +
-    geom_violin(fill = '#FF00CC') +
-    theme_minimal() +
-    coord_cartesian(xlim = full_range) # adding this so every distribution is set to the same scale 
+    geom_violin(fill = '#00FFFF') +
+    theme_void() +
+    coord_cartesian(xlim = full_range) + # adding this so every distribution is set to the same scale 
+    labs(x = "",
+         y = "")
 }
 
 # Step 2 - testing the function
@@ -604,8 +606,8 @@ library(palmerpenguins)
     geom_point(alpha = ...) +
     geom_smooth(method = "lm")
     facet_wrap(~...) +
-     theme(legend.position = "...",
-           base_size = 10) +
+      theme_dark(base_size = 10) + # try replacing the theme here
+     theme(legend.position = "...") +
      labs(... = "...",
           y = "...",
           title = "...",
@@ -621,10 +623,11 @@ library(palmerpenguins)
          aes(x = ... , y = ... , color = )) +
     geom_point() +
     facet_wrap(~...)+
-     theme(legend.position = "...") +
+     theme(... = "...") +
      labs(... = "...",
           y = "...",
-          ... = "...")
+          ... = "...",
+          ... = "")
   
   
   # Splitting by 2 categories
@@ -639,21 +642,21 @@ library(palmerpenguins)
           ... = "")
   
   
-  # Automated Penguin Plot (movie script in production...)
-  ## Please use this as a template to experiment with! Change the variables, and see what you can make of it
+  # Automated Penguin Plot (Movie script in production...)
+  ## Please use this as a template to experiment with! Change the variables, and see what you can make of it.
   
   plot_penguin <- function(my_species) {
   penguins %>%
       na.omit() %>%
-    filter(species == my_species) %>% # Try replacing the ggplot code from with the ggplot code here! 
+    filter(species == my_species) %>% # Try replacing the ggplot code from with your own ggplot code here: 
     ggplot(aes(x = bill_length_mm, y = bill_depth_mm, 
                color = sex)) +
     geom_point() +
     geom_smooth(method = "lm") +
-    theme_minimal() +
+    theme_minimal(base_size = 15) +
       theme(legend.position = "bottom") +
-      labs(x = "Bill Length (in mm)",
-           y = "Bill Depth (in mm)",
+      labs(x = "Bill Length (mm)",
+           y = "Bill Depth (mm)",
            title = my_species) # When copy and pasting, make sure to keep the title `my_species` 
   }
   
