@@ -583,6 +583,7 @@ library(palmerpenguins)
          aes(x = ... , y = ... , color... )) +
     geom_point() 
   
+  ## Adding labels and making it pretty
    ggplot(penguins,
          aes(x = ... , y = ... , color... )) +
     geom_point() +
@@ -597,16 +598,18 @@ library(palmerpenguins)
          aes(x = ... , y = ... , color = )) +
     geom_point(alpha = ...)
    
-   
+    ## Adding labels and making it pretty 
   ggplot(penguins,
          aes(x = ... , y = ... , color = )) +
     geom_point(alpha = ...) +
     geom_smooth(method = "lm")
     facet_wrap(~...) +
-     theme(legend.position = "...") +
-     labs(x = "...",
+     theme(legend.position = "...",
+           base_size = 10) +
+     labs(... = "...",
           y = "...",
-          title = "...")
+          title = "...",
+          color = "")
   
     
     # Splitting by category
@@ -619,9 +622,9 @@ library(palmerpenguins)
     geom_point() +
     facet_wrap(~...)+
      theme(legend.position = "...") +
-     labs(x = "...",
+     labs(... = "...",
           y = "...",
-          title = "...")
+          ... = "...")
   
   
   # Splitting by 2 categories
@@ -630,9 +633,10 @@ library(palmerpenguins)
     geom_point() +
     facet_grid(~... , ~...) +
      theme(legend.position = "...") +
-     labs(x = "...",
-          y = "...",
-          title = "...")
+     labs(... = "...",
+          ... = "...",
+          ... = "...",
+          ... = "")
   
   
   # Automated Penguin Plot (movie script in production...)
