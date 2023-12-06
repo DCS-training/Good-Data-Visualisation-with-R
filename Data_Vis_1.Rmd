@@ -311,7 +311,40 @@ plot_a +
 
 This is the final step - the theme. This is essentially the decorative stage of the plot, and is a vital component of ensuring our plot can be interpreted clearly and accurately.
 
-Playing with the theme layer involves the labels, the font, the gridlines, the legends... all the extras! And there is a near infinite way of playing with this layer.
+Playing with the theme layer involves the colours, the labels, the font, the gridlines, the legends... all the extras! And there is a near infinite way of playing with this layer.
+
+
+### Changing plot colours
+
+There are numerous ways in which we can change the color scheme of our plots. We can use ready made colour palettes, or we can experiment with creating our own custom palettes. 
+
+For the manual method below, we can use either hexcode, and color names (helpfully highlighted and coloured by R). A range can be found here: https://www.nceas.ucsb.edu/sites/default/files/2020-04/colorPaletteCheatsheet.pdf 
+
+```{r colour palettes}
+
+# Manual colour changing
+plot_a +
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))
+
+```
+
+I'm a fan of using the viridis color packages, as they are designed to increase accessibility for colour blind individuals. A full list of viridis options can be found here: https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html
+
+```{r}
+# Viridis palletes - 
+library(viridis)
+plot_a +
+  scale_colour_viridis(discrete = TRUE,
+                         option = "turbo")
+```
+
+
+And below is how we can use a ready made set of colour palettes. A full list of options can be found in the link here: https://www.datanovia.com/en/blog/the-a-z-of-rcolorbrewer-palette/ 
+```{r}
+# Rcolour Brewer palettes
+plot_a +
+  scale_color_brewer(palette = "Dark1")
+```
 
 
 #### Using set themes
@@ -367,6 +400,8 @@ plot_a +
   labs(caption = NULL) # We can use NULL to remove a label
 
 ```
+
+
 
 
 ### Exporting 
@@ -471,11 +506,11 @@ Setosa_data <- iris %>%
 
 Setosa_data %>% 
   ggplot(aes(x= Petal.Length, y = Species)) +
-  geom_violin(fill = "#FF00CC")
+  geom_violin(fill = "#00FFFF")
 
 Setosa_data %>% 
   ggplot(aes(x= Petal.Length, y = Species)) +
-  geom_violin(fill = "#FF00CC") +
+  geom_violin(fill = "#00FFFF") +
   theme_void() # using theme_void() to declutter plot, so that it fits nicely in table.
 
 ```
