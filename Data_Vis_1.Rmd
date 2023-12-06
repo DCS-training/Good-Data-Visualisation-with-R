@@ -34,7 +34,7 @@ So what is the grammar of graphics? And why is it relevant for creating data vis
 *****
 
 ## Why is the Grammar of Graphics relevant for data visualisation?
-I'm going to start with the **why** - I find it easier to be engage with theory if I know why I'm doing so. As someone who struggles to understand grammar in the use of language (native bilingual problems...), why do I find it useful in data science/data visualisation? 
+I'm going to start with the **why*]* - I find it easier to be engage with theory if I know why I'm doing so. As someone who struggles to understand grammar in the use of language (native bilingual problems...), why do I find it useful in data science/data visualisation? 
 
 Well, simply put: it provides structure and guidance to my code. It helps me create my data visualisation with increased consistency and confidence. And just like with language - grammar rules can be bent to fit our needs. Knowing the rules makes it easier and more playful for us. That way we can be the jazz musicians of data science.
 
