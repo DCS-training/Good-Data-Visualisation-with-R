@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+url_1 <- "https://github.com/DCS-training/Good-Data-Visualisation-with-R/blob/main/RVisualisation.png"
 ```
 
 # Good Data Visualisation with R - Session 1
@@ -29,12 +30,13 @@ The main function workhorse for our datavis today will be `ggplot`. This can be 
 So what is the grammar of graphics? And why is it relevant for creating data visualisation? 
 
 
-![](RVisualisation.png)
+![Grammar_of_graphics](RVisualisation.png)
+
 
 *****
 
 ## Why is the Grammar of Graphics relevant for data visualisation?
-I'm going to start with the **why*]* - I find it easier to be engage with theory if I know why I'm doing so. As someone who struggles to understand grammar in the use of language (native bilingual problems...), why do I find it useful in data science/data visualisation? 
+I'm going to start with the **why** - I find it easier to be engage with theory if I know why I'm doing so. As someone who struggles to understand grammar in the use of language (native bilingual problems...), why do I find it useful in data science/data visualisation? 
 
 Well, simply put: it provides structure and guidance to my code. It helps me create my data visualisation with increased consistency and confidence. And just like with language - grammar rules can be bent to fit our needs. Knowing the rules makes it easier and more playful for us. That way we can be the jazz musicians of data science.
 
@@ -138,8 +140,9 @@ ggplot(iris,
 
 ```{r combinedfacet}
 ggplot(iris,
-       aes(x = Sepal.Width, y = Petal.Length, color = Species )) + 
-  geom_point() +
+       aes(x = Sepal.Width, y = Petal.Length, color = Species ))+
+ geom_smooth(method = "lm") +
+  geom_point()  +
   facet_wrap(~Species)
 ```
 
@@ -227,7 +230,7 @@ Which of the above statistical models does this plot represent?
 
 ### Layer 6 - The coordinates layer
 
-Here we need to be careful, as sometimes we might inadvertently exxagerate differences by changing the co-ordinates. But at other times it may be necessary.
+Here we need to be careful, as sometimes we might inadvertently exaggerate differences by changing the co-ordinates. But at other times it may be necessary.
 
 We also have a variety of methods to play around with the coordinates. These can be used to zoom in on our data, to swap axes, and to fix the ratio's between axes. 
 
@@ -243,10 +246,10 @@ ggplot(iris,
        aes(x = Sepal.Width, y = Petal.Length, color = Species )) + 
   geom_point() +
   geom_smooth(method = "lm") +
-  coord_cartesian(xlim = c(2, # minimum x
-                           4.5), # maximum x
-                  ylim = c(0.8, #minimum y
-                           2)) #maximum y
+  coord_cartesian(xlim = c(0, # minimum x
+                           5), # maximum x
+                  ylim = c(0, #minimum y
+                           6)) #maximum y
 
 ```
 
@@ -272,13 +275,14 @@ ggplot(iris,
 
 # Here we are manipulating the data - we will cover this next week. What we are doing is ensuring we can plot the mean value of Petal.Length of each species. 
 
-iris %>% 
-  group_by(Species) %>% 
-  summarise(Mean_Petal_Length = mean(Petal.Length)) %>% 
+iris %>% # choose the data
+  group_by(Species) %>% # grouping
+  summarise(Mean_Petal_Length = mean(Petal.Length)) %>% #applying a summary statistic to each group
 ggplot(aes(x= Species, y = Mean_Petal_Length, fill = Species))+ 
   geom_col() 
 
-iris %>% group_by(Species) %>% 
+iris %>% 
+  group_by(Species) %>% 
   summarise(Mean_Petal_Length = mean(Petal.Length)) %>% 
 ggplot(aes(x = Species, y = Mean_Petal_Length, fill = Species)) + 
   geom_col() +
@@ -303,7 +307,7 @@ ggplot(iris,
 plot_a
 
 plot_a + 
-  coord_fixed(ratio = 3)
+  coord_fixed(ratio = 1)
 
 ```
 
@@ -324,7 +328,7 @@ For the manual method below, we can use either hexcode, and color names (helpful
 
 # Manual colour changing
 plot_a +
-  scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))
+  scale_color_manual(values = c("#E7B800","#6CFC9C",  "#FC4E07"))
 
 ```
 
@@ -335,7 +339,13 @@ I'm a fan of using the viridis color packages, as they are designed to increase 
 library(viridis)
 plot_a +
   scale_colour_viridis(discrete = TRUE,
-                         option = "turbo")
+                         option = "mako")
+
+
+ggplot(iris, aes(x= Petal.Length, color= Petal.Width, y = Sepal.Width))+
+  geom_point()+
+    scale_colour_viridis(discrete = FALSE,
+                         option = "mako")
 ```
 
 
@@ -358,6 +368,9 @@ plot_a +
 plot_a +
   theme_dark()
 
+plot_a +
+  theme_void()
+
 ```
 
 #### Customising our themes
@@ -368,7 +381,7 @@ We can also combine themes! And you can use the theme commands to customise feat
 
 plot_a +
   theme_classic()+
-  theme(legend.position = "bottom")
+  theme(legend.position = "top")
 
 ```
 
@@ -397,7 +410,8 @@ plot_a +
        color = "",
        caption = "Made you read me...",
        ) #+
-  labs(caption = NULL) # We can use NULL to remove a label
+  labs(caption = NULL,
+       x = "") # We can use NULL to remove a label
 
 ```
 
@@ -611,24 +625,28 @@ For the rest of the session, we will do some data-vis playing to consolidate our
 Don't forget to use `summary()` on the dataset to identify the variables you want to plot through the aesthetic line ;) 
 
 ```{r playtime}
-
+instal.packages("palmerpenguins")
 library(palmerpenguins)  
   summary(penguins)
   
+  # Variable names: species, island, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex, year
+  
   # standard scatter plot
   ggplot(penguins,
-         aes(x = ... , y = ... , color... )) +
+         aes(x = ... , y = ... , color =... )) +
     geom_point() 
   
   ## Adding labels and making it pretty
    ggplot(penguins,
-         aes(x = ... , y = ... , color... )) +
+         aes(x = ... , y = ... , color = ... )) +
     geom_point() +
      theme(legend.position = "...") +
      labs(x = "...",
           y = "...",
           title = "...")
-  
+```
+ 
+```{r}
   # Regression line
    
    ggplot(penguins,
@@ -647,7 +665,10 @@ library(palmerpenguins)
           y = "...",
           title = "...",
           color = "")
-  
+
+```
+
+```{r}
     
     # Splitting by category
     ggplot(penguins,
@@ -663,8 +684,9 @@ library(palmerpenguins)
           y = "...",
           ... = "...",
           ... = "")
-  
-  
+```
+
+```{r}
   # Splitting by 2 categories
   ggplot(penguins,
          aes(x = ... , y = ... , color = )) +
@@ -676,7 +698,10 @@ library(palmerpenguins)
           ... = "...",
           ... = "")
   
-  
+
+```
+
+```{r}  
   # Automated Penguin Plot (Movie script in production...)
   ## Please use this as a template to experiment with! Change the variables, and see what you can make of it.
   
@@ -684,18 +709,18 @@ library(palmerpenguins)
   penguins %>%
       na.omit() %>%
     filter(species == my_species) %>% # Try replacing the ggplot code from with your own ggplot code here: 
-    ggplot(aes(x = bill_length_mm, y = bill_depth_mm, 
+    ggplot(aes(x = bill_length_mm, y = body_mass_g, 
                color = sex)) +
     geom_point() +
     geom_smooth(method = "lm") +
     theme_minimal(base_size = 15) +
       theme(legend.position = "bottom") +
       labs(x = "Bill Length (mm)",
-           y = "Bill Depth (mm)",
+           y = "Body mass (g)",
            title = my_species) # When copy and pasting, make sure to keep the title `my_species` 
   }
   
   # Species names: Adelie , Chinstrap , Gentoo - just copy and paste into the function below!
-  plot_penguin(my_species = "Gentoo")
+  plot_penguin(my_species = "Adelie")
 
 ```
