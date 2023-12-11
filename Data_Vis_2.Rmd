@@ -68,13 +68,14 @@ ggplot(penguins,
 ## We can also combine our geometries
 ggplot(penguins, 
        aes(x = species, y = body_mass_g )) +
-  geom_violin(aes(color = species), fill = "white", alpha = .7) +
+  geom_violin(aes(color = species), fill = "grey5", alpha = .7) +
    geom_dotplot(binaxis = "y",
                stackdir = "center",
                dotsize = 0.5,
                alpha = .7, 
+               color = "white",
                aes(fill = species))+
-  geom_boxplot(width = .4, alpha = .7) 
+  geom_boxplot(width = .5, alpha = .4) # alpha = transparency of item, width = width of item
 ```
 
 ```{r}
@@ -101,7 +102,7 @@ Using the plots above, answer the following questions:
 
  * Which penguin species looks to be heaviest?
  * Which sex of penguin tends to be heaviest?
- * Which island has the "biggest bois" of Gentoo penguins?
+ * Which island has the "biggest bois" of Adeile penguins?
 
 ## Bonus missing detour 
 
@@ -133,12 +134,13 @@ penguins %>%
             min = min(body_mass_g),
             max = max(body_mass_g),
             median = median(body_mass_g),
-            sd = sd(body_mass_g)) %>%
+            sd = sd(body_mass_g),
+            mean = mean(body_mass_g)) %>%
   ggplot( aes(
-    x = species, y = median, fill = sex
+    x = species, y = sum, fill = sex
   )) +
  geom_col(position = "dodge") +
-   geom_errorbar(aes(ymin = min, ymax = max), position = "dodge") +
+  # geom_errorbar(aes(ymin = min, ymax = max), position = "dodge") +
   facet_wrap(~island) # +
   coord_flip()
 
@@ -205,15 +207,17 @@ The pie chart is dreaded because:
                position = "dodge") +
   facet_wrap(~sex)
     
-    ggplot(penguin_count, aes(x = reorder(species, percentage_p), 
-                              y = percentage_p,
+    ggplot(island_count, aes(x = reorder(species, percent), 
+                              y = percent,
                               fill = species)) + 
       geom_bar(stat="identity", 
                position = "dodge") + 
-      geom_text(aes(label = scales::percent(round(percentage_p, 3))),
+      geom_text(aes(label = scales::percent(round(percent, 3))),
                 position = position_stack(vjust = 0.5)) +
-      labs(x= "species",
-           y = "Percentage %")
+      labs(x= "Species",
+           y = "Percentage %") +
+      coord_cartesian(ylim = c(.48, .52)) +
+      facet_wrap(~sex ~island )
     
  
     
@@ -249,14 +253,14 @@ ggplot( aes(x = reorder(island, n),
       geom_line(aes(group = island)) + # creating line in between the point for each island
      geom_point(aes(color = species), size = 10) +# colouring each point by the species 
   geom_text(aes(label = n, vjust = .5), size = 3) +
+  #facet_wrap(~sex) +
   scale_y_continuous(limits = c(0, 150)) +
-      coord_flip()+
-  theme(legend.position = "right")+
+      coord_flip() +
   labs(color = "",
        x = "Island",
        y = "Number of Penguins",
        title = "Penguin Distribution Plot") +
-  theme_minimal(base_size = 15) +
+  theme_minimal(base_size = 15)+
   theme(legend.position = "left")
 
 ```
@@ -269,6 +273,7 @@ Here we will be working with mpg dataset - as it contains a higher number of cat
 Our aim is to find out which brand has the highest mpg. Our first step is to tidy the data. Our second will be to create a treemap to visualise the data.
 
 ```{r}
+#instal.packages("treemapify")
    library(treemapify)  
     ?mpg
     head(mpg)
@@ -278,7 +283,8 @@ data <- mpg %>% mutate(
   manufacturer = as.factor(manufacturer),
   model = as.factor(model)
 ) %>% group_by(manufacturer) %>%
-  summarise(avg_hwy = mean(hwy))
+  summarise(avg_hwy = mean(hwy)) %>% 
+  arrange(avg_hwy)
 data
 ```
 
@@ -302,7 +308,8 @@ Now that we have identified the most efficent brand of car, can we find the most
     manufacturer = as.factor(manufacturer),
     model = as.factor(model)
   ) %>% group_by(model) %>%
-    summarise(avg_hwy = mean(hwy))
+    summarise(avg_hwy = mean(hwy)) %>%
+  arrange(avg_hwy)
   data
 ```
 
@@ -327,7 +334,8 @@ Now that we have identified the most efficent brand of car, can we find the most
     model = as.factor(model),
     year = as.factor(year)
   ) %>% group_by(year, manufacturer) %>%
-    summarise(avg_hwy = mean(hwy))
+    summarise(avg_hwy = mean(hwy)) %>% 
+  arrange(avg_hwy)
   data
   summary(data)
 ```
@@ -453,7 +461,7 @@ plot_2 <- plot +
   scale_x_continuous( # scale_x_continuous() for manipulating the x axis.
     expand = c(0, 0), limits = c(0, .13), # Setting limits to min and max ranges
     labels = scales::label_percent(), # converting proportion to %
-    name = "Proportion" # Renaming x axis to "Proportion"
+    name = "Percentage" # Renaming x axis to "Proportion"
   ) 
 
 plot_2
@@ -520,8 +528,8 @@ plot_4 <- plot_3 +
                        sprintf("%0.1f", #setting decimal places and sum
                                prop * 100),
                        "%  "), # setting symbol, and space at end of label
-        color = prop > .03, # setting colour rule for prop values greater than .05
-        hjust = prop > .03), # setting horizontal rule for prop values greater than .05
+        color = prop > .03, # setting colour rule for prop values greater than .03
+        hjust = prop > .03), # setting horizontal rule for prop values greater than .03
     size = 4, fontface = "bold" # setting font size and "bold"
   ) +
   scale_color_manual(
@@ -548,7 +556,8 @@ fancy_plot <- starwars %>% select(homeworld) %>% #we are only interested in spec
    prop == max(prop) ~ "green4",
    prop == min(prop) ~ "red4",
    prop > min(prop) & prop <max(prop) ~ "gray60"
- ),cut = forcats::fct_reorder(homeworld, prop, .desc = TRUE)) %>% 
+ ),
+ cut = forcats::fct_reorder(homeworld, prop, .desc = TRUE)) %>% 
   ggplot(aes(x =prop, y = homeworld, fill = col)) + #here specifying we want color set by our colour rules
   geom_col() +
   geom_text(
@@ -622,7 +631,7 @@ fancy_plot
     geom_bar(stat="identity", 
              position = "...") 
  
-  # How many of each color is there for each cut? (column chart and dumbbell please - which is best for this dataset?)
+  # How many of each color is there for each cut? (column chart and dumbbell  - which is best for this dataset?)
 ```
 
 ```{r}
