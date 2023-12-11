@@ -38,7 +38,7 @@ head(penguins)
 
 ![The Penguins](lter_penguins.png)
 
-Last week we focused mostly on plotting numeric Vs numeric data. But sometimes we categorically have to consider categories (sorry not sorry). This opens up whole new avenues and options for us, as we can start to consider representing percentages, means, medians, counts, and a whole bunch of other scenarios. We can also use the grammar approach of ggplot to layer different visualisations. Today we will be looking at our penguin dataset to compare between species, island and sex, and how these relate to penguin bodyweight. Let's have a look through our examples below:
+Last week we focused mostly on plotting numeric Vs numeric data. But sometimes we categorically have to consider categories. This opens up whole new avenues and options for us, as we can start to consider representing percentages, means, medians, counts, and a whole bunch of other scenarios. We can also use the grammar approach of ggplot to layer different visualisations. Today we will be looking at our penguin dataset to compare between species, island and sex, and how these relate to penguin bodyweight. Let's have a look through our examples below:
 
 ```{r example plots}
 
@@ -55,8 +55,10 @@ ggplot(penguins,
 ggplot(penguins, 
        aes(x = island, fill = species )) +
   geom_bar(position = "dodge") 
+```
 
 
+```{r}
 #boxplots
 
 ggplot(penguins, 
@@ -66,14 +68,16 @@ ggplot(penguins,
 ## We can also combine our geometries
 ggplot(penguins, 
        aes(x = species, y = body_mass_g )) +
-  geom_violin() +
+  geom_violin(aes(color = species), fill = "white", alpha = .7) +
    geom_dotplot(binaxis = "y",
                stackdir = "center",
                dotsize = 0.5,
                alpha = .7, 
                aes(fill = species))+
   geom_boxplot(width = .4, alpha = .7) 
+```
 
+```{r}
 ## Or we can engage with Multi-group faceting
 ggplot(penguins, 
        aes(x = species, y = body_mass_g, fill = sex )) +
@@ -134,8 +138,7 @@ penguins %>%
     x = species, y = median, fill = sex
   )) +
  geom_col(position = "dodge") +
-  # geom_errorbar(aes(ymin = min, ymax = max, 
-  #                   col = sex)) +
+   geom_errorbar(aes(ymin = min, ymax = max), position = "dodge") +
   facet_wrap(~island) # +
   coord_flip()
 
@@ -206,7 +209,11 @@ The pie chart is dreaded because:
                               y = percentage_p,
                               fill = species)) + 
       geom_bar(stat="identity", 
-               position = "dodge")
+               position = "dodge") + 
+      geom_text(aes(label = scales::percent(round(percentage_p, 3))),
+                position = position_stack(vjust = 0.5)) +
+      labs(x= "species",
+           y = "Percentage %")
     
  
     
@@ -216,13 +223,16 @@ The pie chart is dreaded because:
 
 ```{r}    
     penguins %>% 
-    group_by( island, species) %>% 
+    group_by(island, species) %>% 
     summarise(n = n()) %>% na.omit() %>%
 ggplot( aes(x = reorder(island, n), 
                             y = n,
                             fill = species)) + 
     geom_bar(stat="identity", 
-             position = "dodge")
+             position = "dodge") + 
+      geom_text(aes(label = n, vjust = -.5), position = position_dodge(width = .9)) +
+      labs(x= "species",
+           y = "n")
 
 ```
   
@@ -237,12 +247,17 @@ ggplot( aes(x = reorder(island, n),
                   y = n,
                  )) + 
       geom_line(aes(group = island)) + # creating line in between the point for each island
-     geom_point(aes(color = species), size = 6) +# colouring each point by the species 
-  geom_text(aes(label = n), size = 2.5) +
+     geom_point(aes(color = species), size = 10) +# colouring each point by the species 
+  geom_text(aes(label = n, vjust = .5), size = 3) +
   scale_y_continuous(limits = c(0, 150)) +
       coord_flip()+
   theme(legend.position = "right")+
-  labs(color = "")
+  labs(color = "",
+       x = "Island",
+       y = "Number of Penguins",
+       title = "Penguin Distribution Plot") +
+  theme_minimal(base_size = 15) +
+  theme(legend.position = "left")
 
 ```
 
@@ -265,7 +280,9 @@ data <- mpg %>% mutate(
 ) %>% group_by(manufacturer) %>%
   summarise(avg_hwy = mean(hwy))
 data
- 
+```
+
+```{r}
   ggplot(data, aes(fill = avg_hwy, area = avg_hwy, label = manufacturer )) +
   geom_treemap() +
   geom_treemap_text(colour = "white",
@@ -287,7 +304,9 @@ Now that we have identified the most efficent brand of car, can we find the most
   ) %>% group_by(model) %>%
     summarise(avg_hwy = mean(hwy))
   data
-  
+```
+
+```{r}
   ggplot(data, aes(fill = avg_hwy, area = avg_hwy, label = model )) +
     geom_treemap() +
     geom_treemap_text(colour = "white",
@@ -311,7 +330,9 @@ Now that we have identified the most efficent brand of car, can we find the most
     summarise(avg_hwy = mean(hwy))
   data
   summary(data)
-  
+```
+
+```{r}
   ggplot(data, aes(fill = avg_hwy, area = avg_hwy, label = manufacturer )) +
     geom_treemap() +
     geom_treemap_text(colour = "white",
@@ -574,8 +595,9 @@ fancy_plot
     ggplot(aes(x= reorder(...,mean_price)
                , y = ...)) +
     geom_col(aes(fill = cut))
-  
-  
+```  
+
+```{r}  
   # Plot 2 - average price of each colour of diamond within each cut
   
   diamonds %>% 
@@ -584,7 +606,9 @@ fancy_plot
     ggplot(aes(x= reorder(cut,mean_depth),
                y = mean_depth)) +
     geom_col(aes(fill = ...), position = "dodge") 
-  
+```
+
+```{r}
   # Plot 3 - What is the proportion of each cut?
   
   diamond_prop <- diamonds %>%
@@ -599,7 +623,9 @@ fancy_plot
              position = "...") 
  
   # How many of each color is there for each cut? (column chart and dumbbell please - which is best for this dataset?)
+```
 
+```{r}
   # Column chart  
   diamonds %>% 
     group_by( cut, color) %>% 
@@ -610,7 +636,9 @@ fancy_plot
     geom_col(position = "...", aes(fill = color)) +
     coord_flip() +
     theme(legend.position = "bottom") 
-  
+```
+
+```{r}
   #dumbbell chart
   diamonds %>% 
     group_by( cut, ...) %>% 
@@ -623,7 +651,9 @@ fancy_plot
    geom_text(aes(label = ...)) +
     coord_flip() +
     theme(legend.position = "") 
-  
+```
+
+```{r}
   ## What if reviewer 2 is being silly, and wants us to split by cut, by color, and by clarity (the triple c).
   
   diamonds %>% 
@@ -636,7 +666,9 @@ fancy_plot
     coord_flip() +
     theme(legend.position = "bottom") +
     facet_wrap(~..., ncol = 4)
-  
+```
+
+```{r}
   ## Within the triple C (cut, color, clarity), which sub-sub group has the most expensive diamonds? (on average)
   
   diamonds %>% 
@@ -665,7 +697,9 @@ fancy_plot
                , y = cut)) +
     geom_col(aes(fill = cut))
   
-  
+```
+
+```{r}
   # Plot 2 - average price of each colour of diamond within each cut
   
   diamonds %>% 
@@ -674,20 +708,26 @@ fancy_plot
     ggplot(aes(x= reorder(cut, mean_depth),
                y = mean_depth)) +
     geom_col(aes(fill = color), position = "dodge") 
-  
+```
+
+```{r}
   # Plot 3 - What is the proportion of each cut?
   
   diamond_prop <- diamonds %>%
     count(cut) %>% 
     mutate(percentage_cut = n/nrow(diamonds))
   head(diamond_prop)
-  
+```
+
+```{r}
   ggplot(diamond_prop, aes(x = reorder(cut, percentage_cut), # think about whether reordering is useful here... (but also compare with and without)
                             y = percentage_cut,
                             fill = cut)) + 
     geom_bar(stat="identity", 
              position = "dodge") 
- 
+```
+
+```{r}
   # How many of each color is there for each cut? (column chart and dumbbell please - which is best for this dataset?)
 
   # Column chart  
@@ -713,7 +753,9 @@ fancy_plot
    geom_text(aes(label = color)) +
     coord_flip() +
     theme(legend.position = "") 
-  
+```
+
+```{r}
   ## What if reviewer 2 is being silly, and wants us to split by cut, by color, and by clarity (the triple c).
   
   diamonds %>% 
@@ -726,7 +768,9 @@ fancy_plot
     coord_flip() +
     theme(legend.position = "bottom") +
     facet_wrap(~clarity, ncol = 4)
-  
+```
+
+```{r}
   ## Within the triple C (cut, color, clarity), which sub-sub group has the most expensive diamonds? (on average)
   
   diamonds %>% 
