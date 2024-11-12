@@ -7,8 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(tidyverse)
-url_1 <- "https://github.com/DCS-training/Good-Data-Visualisation-with-R/blob/main/RVisualisation.png"
+library(tidyverse) # Plotting and data tidying
+library(gridExtra) # Allows us to arrange plots side by side
 ```
 
 # Good Data Visualisation with R - Session 1
@@ -30,8 +30,7 @@ The main function workhorse for our datavis today will be `ggplot`. This can be 
 So what is the grammar of graphics? And why is it relevant for creating data visualisation? 
 
 
-![Grammar_of_graphics](RVisualisation.png)
-
+![Grammar of Graphics](https://raw.github.com/DCS-training/Good-Data-Visualisation-with-R/main/images/RVisualisation.png)
 
 *****
 
@@ -44,16 +43,17 @@ Well, simply put: it provides structure and guidance to my code. It helps me cre
 
 So I've started backwards with the why to the **grammar of graphics**. Time to move towards the **what**. To use a metaphor, it is a recipe template for data visualisation. It provides us with an outline of the core ingredients/layers, and guidance on where and when to add them. What we get is a lovely casserole of a data visualisation. 
 
-![Grammar of graphics](casserole.png)
+![Grammar of graphics and casserolle metaphor](https://raw.github.com/DCS-training/Good-Data-Visualisation-with-R/main/images/casserole.png)
 
-Today we will work through each of the layers, one by one. The aim of this is to highlight how the grammar of graphics is used. (We may also show how sometimes we can bend the rules).
+Today we will work through each of the layers, one by one. The aim of this is to highlight how the grammar of graphics is used. (We may also show how sometimes we can bend the rules, so we can go beyond the recipe book and start cooking up any tasty plot our heart desires).
 
 ### Layer 1 - The data
 
-Today we will be using another workhorse of the datascience world - the **Iris** dataset. Iris a nice tidy data set, so there will be minimal datawrangling. This way we can focus on the data vis. 
+Today we will be using the dataset workhorse of the datascience world - the **Iris** dataset. Iris a nice tidy data set, so there will be minimal datawrangling. This way we can focus on the data vis. 
 
 So lets have a look at our Iris data. 
 ```{r data}
+library(tidyverse)
 head(iris)
 summary(iris)
 
@@ -63,7 +63,7 @@ Now that we have a feel for the data, lets start building our plot with ggplot, 
 
 ```{r data layer}
 
-ggplot(iris,)
+ggplot(data = iris,)
 
 ```
 
@@ -80,8 +80,8 @@ Our first layer was about establishing the data - the core mix of the ingredient
 In this session, we are going to plot `Sepal.Width` against `Petal.Length` from `iris`. However, we will notice that the plot produced still looks rather empty. But we do now have our coordinates set. To draw the connections between our x-axis and y-axis, we need to move to our **geometry** layer. 
 
 ```{r aestectic layer}
-
-ggplot(iris,
+summary(iris)
+ggplot(data = iris,
        aes(x = Sepal.Width, y = Petal.Length))
 
 ```
@@ -92,13 +92,22 @@ Time to connect the dots between `x` and `y` - quite literally this time as we a
 
 In fact, a beautiful feature of ggplot is that we can add as many layers as we like. For a full list of layers, please check out here: https://ggplot2.tidyverse.org/reference/ . 
 
-This plot is now looking to be more informative in helping us understand the association between the `Sepal.Width` and `Petal.Lenght` in `iris` flowers. But we can still add additional information to help clarify this data visualisation, and we will do this through the `faceting` layer.
+This plot is now looking to be more informative in helping us understand the association between the `Sepal.Width` and `Petal.Length` in `iris` flowers. But we can still add additional information to help clarify this data visualisation, and we will do this through the `faceting` layer.
 
-```{r geometry layer}
+```{r geometry 1 layer}
 
-ggplot(iris,
+ggplot(data = iris,
        aes(x = Sepal.Width, y = Petal.Length)) + 
-  geom_point()
+  geom_point() 
+
+```
+
+```{r geometry 2 layers}
+
+ggplot(data = iris,
+       aes(x = Sepal.Width, y = Petal.Length)) + 
+  geom_point() +
+  geom_smooth(se = TRUE, method = "lm")
 
 ```
 
@@ -113,7 +122,7 @@ Anyhow - onto the various ways in which we can `facet` our data.
 #### Option a) facet wrap
 
 ```{r facetwrap}
-ggplot(iris,
+ggplot(data = iris,
        aes(x = Sepal.Width, y = Petal.Length )) + 
   geom_point() +
   facet_wrap(~Species)
@@ -122,31 +131,32 @@ ggplot(iris,
 
 #### Option b) - using color 
 
-The 2 options below acheive the same at this stage, but will have subtle differences when it comes to adding the statistic later. We can also define as `shape` or `size` instead of color if we want to (or all at once!).  
+The 2 options below achieve the same at this stage, but will have subtle differences when it comes to adding the statistic later. We can also define as `shape` or `size` instead of color if we want to (or all at once!).  
 
 ```{r colorfacet}
-ggplot(iris,
+ggplot(datra = iris,
        aes(x = Sepal.Width, y = Petal.Length, color = Species )) + 
   geom_point()
 ```
 
 ```{r colorfacet2}
-ggplot(iris,
+ggplot(data = iris,
        aes(x = Sepal.Width, y = Petal.Length)) + 
   geom_point(aes(color = Species))
 ```
 
-#### Option c) - combining facet and color 
+#### Option c) - combining facet and color and shape
 
 ```{r combinedfacet}
-ggplot(iris,
-       aes(x = Sepal.Width, y = Petal.Length, color = Species ))+
- geom_smooth(method = "lm") +
-  geom_point()  +
+ggplot(data = iris,
+       aes(x = Sepal.Width, y = Petal.Length, color = Species, shape = Species )) + 
+  geom_point() +
   facet_wrap(~Species)
 ```
 
 Now that we have faceted our plots, what do we think the association is between `Sepal.Width` and `Petal.Length` in `iris` flowers? 
+
+We are exploring this association as our aim of the visualisation is to visually communicate any patterns of our data.
 
 If you want a *"hint"*, we'll need to a statistic layer to the plot.
 
@@ -159,10 +169,10 @@ Here we will learn how we can add a statistic to model the data. Whilst this can
 ggplot(iris,
        aes(x = Sepal.Width, y = Petal.Length, color = Species )) + 
   geom_point() +
-  geom_smooth() # default is loess - local regression (flexible)
+  geom_smooth() # default is loess - which is a local regression (flexible). To get a linear model, we need to specify `method = "lm"` in the geom_smooth() function.
 ```
 
-#### Linear model - and spotting the simpson paradox 
+## Spotting paradoxes with data visualisation 
 
 Here will be setting a `linear model` for our statistic, and demonstrating the **2** ways in which the linear model can be applied to our data. 
 
@@ -174,67 +184,67 @@ Which plot do we think best represents the data?
 
 Which plot do we think best represents the research? ;) 
 
-(For more information - https://en.wikipedia.org/wiki/Simpson%27s_paradox)
+For more information on this paradox, read up on the [Simpson paradox](https://en.wikipedia.org/wiki/Simpson%27s_paradox).
 
 ```{r simpson_paradox}
 plot_a <- ggplot(iris,
+       aes(x = Sepal.Width, y = Petal.Length )) + 
+  geom_point(aes( color = Species)) +
+  geom_smooth(method = "lm") + # Model set to "lm" (linear model).
+  theme(legend.position = "bottom") # Here we are setting the legend position to the bottom of the screen to make a tidier plot
+plot_a
+```
+
+```{r}
+plot_b <- ggplot(iris,
        aes(x = Sepal.Width, y = Petal.Length, color = Species )) + 
   geom_point() +
-  geom_smooth(method = "lm")  # Model set to "lm" (linear model).
-  
-plot_a
-
-plot_b <- ggplot(iris,
-       aes(x = Sepal.Width, y = Petal.Length)) + 
-  geom_point(aes(color = Species)) +
-  geom_smooth(method = "lm") 
+  geom_smooth(method = "lm") +
+  theme(legend.position = "bottom")
 
 plot_b
 ```
 
-##### Find the correct model 
-
-Below are 3 different statistical models. Your task is to determine which of these models represents `plot_a`, and which of these models represents `plot_b`, and how might we plot the other model? 
-
-```{r models}
-
-model_1 <- lm(Petal.Length ~ Sepal.Width, iris)
-model_2 <- lm(Petal.Length ~ Sepal.Width + Species, iris)
-model_3 <- lm(Petal.Length ~ Sepal.Width * Species, iris)
-summary(model_1)
-summary(model_2)
-summary(model_3)
-
+```{r}
+grid.arrange(plot_a, plot_b, ncol=2)
 ```
 
-#### Bonus - Plotting complicated models
+#### Bonus - Plotting data to represent our models
 
 Our first step here is to set the parameters for our customisable statistic model... which is actually a lot easier than it sounds/reads. 
 
 ```{r complex}
 #Step 1 - setting the model 
-model_complex <- lm(Petal.Length ~ Sepal.Width + Species, iris)
+
+model <- lm(Petal.Length ~ Sepal.Width + Species, iris)
 
 #Step 2 - predicting values with the model
-iris_new <- iris %>% mutate(predlm = predict(model_complex))
+
+iris_new <- iris %>% 
+  mutate(predlm = predict(model)) # Here we are making a new variable called "predlm", where it's values are the predicted values from our regression above.
 
 
 #Step 3 - Visualising with the predicted values
-ggplot(iris_new,
+
+plot_c <- ggplot(iris_new,
        aes(x = Sepal.Width, y = Petal.Length, color = Species)) + 
   geom_point() +
-  geom_line(aes(y = predlm), linewidth = 1)
+  geom_line(aes(y = predlm), linewidth = 1) + # We use geom_line, and ask its co-ordinates to be set to our "predlm" values made above
+  theme(legend.position = "bottom")
+
+# Step 4 - arranging all plots to be viewed together
+grid.arrange(plot_a, plot_b, plot_c, ncol=3)
 ```
 
 Which of the above statistical models does this plot represent? 
 
-### Layer 6 - The coordinates layer
+## Layer 6 - The coordinates layer
 
-Here we need to be careful, as sometimes we might inadvertently exaggerate differences by changing the co-ordinates. But at other times it may be necessary.
+Here we need to be careful, as sometimes we might inadvertently exxagerate differences by changing the co-ordinates. But at other times it may be necessary.
 
 We also have a variety of methods to play around with the coordinates. These can be used to zoom in on our data, to swap axes, and to fix the ratio's between axes. 
 
-#### coord_cartesian() 
+### coord_cartesian() 
 
 `coord_cartesian()` allows us to zoom in on our data visualisation. This can be very useful to highlight subtle differences within our data, but does run the risk of exaggerating differences within our data... It is a fine line between the two! 
 
@@ -246,14 +256,14 @@ ggplot(iris,
        aes(x = Sepal.Width, y = Petal.Length, color = Species )) + 
   geom_point() +
   geom_smooth(method = "lm") +
-  coord_cartesian(xlim = c(0, # minimum x
-                           5), # maximum x
-                  ylim = c(0, #minimum y
-                           6)) #maximum y
+  coord_cartesian(xlim = c(2, # minimum x
+                           4.5), # maximum x
+                  ylim = c(0.8, #minimum y
+                           2)) #maximum y
 
 ```
 
-#### coord_flip()
+### coord_flip()
 
 I love `coord_flip()`. However, it's main purpose is somewhat wasted here. It's main benefit is if you want to plot categorical against numerical data. We will demonstrate all of these scenarios below.
 
@@ -269,28 +279,42 @@ ggplot(iris,
 
 ```
 
-##### Coordflip on categorical data (just for example)
+#### Coordflip on categorical data (just for example)
 
 ```{r coord_flip_cat}
 
-# Here we are manipulating the data - we will cover this next week. What we are doing is ensuring we can plot the mean value of Petal.Length of each species. 
+# Here we are manipulating the data - we will cover this next week. What we are doing is ensuring we can plot the mean value of Petal.Length of each species. This in turn is fed into the geom_col() function to make a column chart.
 
-iris %>% # choose the data
-  group_by(Species) %>% # grouping
-  summarise(Mean_Petal_Length = mean(Petal.Length)) %>% #applying a summary statistic to each group
+column_chart_1 <- iris %>% 
+  group_by(Species) %>% 
+  summarise(Mean_Petal_Length = mean(Petal.Length)) %>% 
 ggplot(aes(x= Species, y = Mean_Petal_Length, fill = Species))+ 
   geom_col() 
 
-iris %>% 
-  group_by(Species) %>% 
+column_chart_1
+```
+
+Now lets see the difference when the co-ordinates have been swapped.
+
+```{r}
+
+
+column_chart_2 <- iris %>% group_by(Species) %>% 
   summarise(Mean_Petal_Length = mean(Petal.Length)) %>% 
 ggplot(aes(x = Species, y = Mean_Petal_Length, fill = Species)) + 
   geom_col() +
   coord_flip()
 
+column_chart_2
 ```
 
-#### coord_fixed()
+Now let's arrange both column charts to be viewed together, and decide which we think is more effective at communicating the petal length in the different species of iris flowers.
+
+```{r}
+grid.arrange(column_chart_1, column_chart_2)
+```
+
+### coord_fixed()
 
 `coord_fixed()` creates a coordinate system with a specified aspect ratio. This is very useful if both axes use the same units. 
 
@@ -298,17 +322,19 @@ We have included the "unfixed" version of the plot from earlier, so that you can
 
 ```{r fixed_coord}
 
-ggplot(iris,
+fixed_coord_plot <- ggplot(iris,
        aes(x = Sepal.Width, y = Petal.Length, color = Species )) + 
   geom_point() +
   geom_smooth(method = "lm") +
   coord_fixed(ratio = 1)
 
-plot_a
+fixed_coord_plot
 
-plot_a + 
-  coord_fixed(ratio = 1)
+plot_b
 
+
+
+grid.arrange(plot_b, fixed_coord_plot, ncol = 2)
 ```
 
 ### Layer 7 - The Theme layer
@@ -328,7 +354,7 @@ For the manual method below, we can use either hexcode, and color names (helpful
 
 # Manual colour changing
 plot_a +
-  scale_color_manual(values = c("#E7B800","#6CFC9C",  "#FC4E07"))
+  scale_color_manual(values = c("#00AFBB", "#E7B800", "#FC4E07"))
 
 ```
 
@@ -339,13 +365,7 @@ I'm a fan of using the viridis color packages, as they are designed to increase 
 library(viridis)
 plot_a +
   scale_colour_viridis(discrete = TRUE,
-                         option = "mako")
-
-
-ggplot(iris, aes(x= Petal.Length, color= Petal.Width, y = Sepal.Width))+
-  geom_point()+
-    scale_colour_viridis(discrete = FALSE,
-                         option = "mako")
+                         option = "viridis")
 ```
 
 
@@ -353,7 +373,7 @@ And below is how we can use a ready made set of colour palettes. A full list of 
 ```{r}
 # Rcolour Brewer palettes
 plot_a +
-  scale_color_brewer(palette = "Dark1")
+  scale_color_brewer(palette = "Accent")
 ```
 
 
@@ -367,9 +387,6 @@ plot_a +
 
 plot_a +
   theme_dark()
-
-plot_a +
-  theme_void()
 
 ```
 
@@ -410,8 +427,7 @@ plot_a +
        color = "",
        caption = "Made you read me...",
        ) #+
-  labs(caption = NULL,
-       x = "") # We can use NULL to remove a label
+  labs(caption = NULL) # We can use NULL to remove a label
 
 ```
 
@@ -457,8 +473,135 @@ summary(m) # Checking summary of analysis
 plot(m) # plotting the residuals to check model assumptions
 
 ```
-## Bonus material (if time)
-### Automated plots, and fancy tables
+
+# Playtime 
+
+For the rest of the session, we will do some data-vis playing to consolidate our learning. For this we will use the `PalmerPenguins` data set. 
+
+![Palmer Penguins](https://raw.github.com/DCS-training/Good-Data-Visualisation-with-R/main/images/lter_penguins.png)
+
+Below I have provided some skeleton code that you can use for customising. But be brave and try to play around without the stablisiers as well. 
+
+Don't forget to use `summary()` on the dataset to identify the variables you want to plot through the aesthetic line ;) 
+
+```{r playtime}
+
+library(palmerpenguins)  
+  summary(penguins)
+  
+  # standard scatter plot
+  ggplot(penguins,
+         aes(x = ... , y = ... , color... )) +
+    geom_point() 
+```
+
+```{r}
+  ## Adding labels and making it pretty
+   ggplot(penguins,
+         aes(x = ... , y = ... , color... )) +
+    geom_point() +
+     theme(legend.position = "...") +
+     labs(x = "...",
+          y = "...",
+          title = "...")
+```
+
+```{r}
+  # Regression line
+   
+   ggplot(penguins,
+         aes(x = ... , y = ... , color = )) +
+    geom_point(alpha = ...)
+   
+    ## Adding labels and making it pretty 
+  ggplot(penguins,
+         aes(x = ... , y = ... , color = )) +
+    geom_point(alpha = ...) +
+    geom_smooth(method = "lm")
+    facet_wrap(~...) +
+      theme_dark(base_size = 10) + # try replacing the theme here
+     theme(legend.position = "...") +
+     labs(... = "...",
+          y = "...",
+          title = "...",
+          color = "")
+```  
+
+```{r}    
+    # Splitting by category
+    ggplot(penguins,
+         aes(x = ... , y = ... , color = )) +
+    geom_point()
+    
+  ggplot(penguins,
+         aes(x = ... , y = ... , color = )) +
+    geom_point() +
+    facet_wrap(~...)+
+     theme(... = "...") +
+     labs(... = "...",
+          y = "...",
+          ... = "...",
+          ... = "")
+  
+```
+
+```{r}
+  # Splitting by 2 categories
+  ggplot(penguins,
+         aes(x = ... , y = ... , color = )) +
+    geom_point() +
+    facet_grid(~... , ~...) +
+     theme(legend.position = "...") +
+     labs(... = "...",
+          ... = "...",
+          ... = "...",
+          ... = "")
+  
+```
+
+
+#### Blank code! Do what you like
+
+```{r}
+
+```
+
+
+
+
+
+## Additional Bonus material - Automated Plots, and fancy tables
+ 
+### Automated Plots
+
+Congratulations! For those of you who made it down here, you will have stumbled upon the code to to start making functions for your plots. Making functions to create your plots allows you to automate your plot desires. This is a little more advanced, but don't let that scare you. Use it as a template, and then play around with it to see what does what.
+
+```{r}
+  # Automated Penguin Plot 
+  ## Please use this as a template to experiment with! Change the variables, and see what you can make of it.
+  
+  plot_penguin <- function(my_species) {
+  penguins %>%
+      na.omit() %>%
+    filter(species == my_species) %>% # Try replacing the ggplot code from with your own ggplot code here: 
+    ggplot(aes(x = bill_length_mm, y = bill_depth_mm, 
+               color = sex)) +
+    geom_point() +
+    geom_smooth(method = "lm") +
+    theme_minimal(base_size = 15) +
+      theme(legend.position = "bottom") +
+      labs(x = "Bill Length (mm)",
+           y = "Bill Depth (mm)",
+           subtitle = my_species,
+           title = "Sex Differences within Penguin Species") 
+  }
+  
+  # Species names: Adelie , Chinstrap , Gentoo - just copy and paste into the function below!
+  plot_penguin(my_species = "Adelie")
+
+```
+
+### Fancy tables with plots integrated
 
 This next section is inspired from a blog lesson from: https://rfortherestofus.com/2023/10/ggplots-in-gt-tables 
 
@@ -618,109 +761,4 @@ fancy_table
 
 ```
 
-## Playtime 
-
-For the rest of the session, we will do some data-vis playing to consolidate our learning. For this we will use the `PalmerPenguins`![ https://allisonhorst.github.io/palmerpenguins/ ] data set. Below I have provided some skeleton code that you can use for customising. But be brave and try to play around without the stablisiers as well. 
-
-Don't forget to use `summary()` on the dataset to identify the variables you want to plot through the aesthetic line ;) 
-
-```{r playtime}
-instal.packages("palmerpenguins")
-library(palmerpenguins)  
-  summary(penguins)
-  
-  # Variable names: species, island, bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g, sex, year
-  
-  # standard scatter plot
-  ggplot(penguins,
-         aes(x = ... , y = ... , color =... )) +
-    geom_point() 
-  
-  ## Adding labels and making it pretty
-   ggplot(penguins,
-         aes(x = ... , y = ... , color = ... )) +
-    geom_point() +
-     theme(legend.position = "...") +
-     labs(x = "...",
-          y = "...",
-          title = "...")
-```
- 
-```{r}
-  # Regression line
-   
-   ggplot(penguins,
-         aes(x = ... , y = ... , color = )) +
-    geom_point(alpha = ...)
-   
-    ## Adding labels and making it pretty 
-  ggplot(penguins,
-         aes(x = ... , y = ... , color = )) +
-    geom_point(alpha = ...) +
-    geom_smooth(method = "lm")
-    facet_wrap(~...) +
-      theme_dark(base_size = 10) + # try replacing the theme here
-     theme(legend.position = "...") +
-     labs(... = "...",
-          y = "...",
-          title = "...",
-          color = "")
-
-```
-
-```{r}
-    
-    # Splitting by category
-    ggplot(penguins,
-         aes(x = ... , y = ... , color = )) +
-    geom_point()
-    
-  ggplot(penguins,
-         aes(x = ... , y = ... , color = )) +
-    geom_point() +
-    facet_wrap(~...)+
-     theme(... = "...") +
-     labs(... = "...",
-          y = "...",
-          ... = "...",
-          ... = "")
-```
-
-```{r}
-  # Splitting by 2 categories
-  ggplot(penguins,
-         aes(x = ... , y = ... , color = )) +
-    geom_point() +
-    facet_grid(~... , ~...) +
-     theme(legend.position = "...") +
-     labs(... = "...",
-          ... = "...",
-          ... = "...",
-          ... = "")
-  
-
-```
-
-```{r}  
-  # Automated Penguin Plot (Movie script in production...)
-  ## Please use this as a template to experiment with! Change the variables, and see what you can make of it.
-  
-  plot_penguin <- function(my_species) {
-  penguins %>%
-      na.omit() %>%
-    filter(species == my_species) %>% # Try replacing the ggplot code from with your own ggplot code here: 
-    ggplot(aes(x = bill_length_mm, y = body_mass_g, 
-               color = sex)) +
-    geom_point() +
-    geom_smooth(method = "lm") +
-    theme_minimal(base_size = 15) +
-      theme(legend.position = "bottom") +
-      labs(x = "Bill Length (mm)",
-           y = "Body mass (g)",
-           title = my_species) # When copy and pasting, make sure to keep the title `my_species` 
-  }
-  
-  # Species names: Adelie , Chinstrap , Gentoo - just copy and paste into the function below!
-  plot_penguin(my_species = "Adelie")
-
-```
+#
