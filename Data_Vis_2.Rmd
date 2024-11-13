@@ -6,9 +6,12 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-#install.packages("palmerpenguins")
-library(palmerpenguins)  
-library(tidyverse)
+#install.packages(c("palmerpenguins", "tidyverse", "naniar")) # delete initial comment and run code if library commands do not work.
+
+library(palmerpenguins)  # load the penguin dataset
+library(tidyverse) # Data tidying and data visualisation
+library(naniar) # Missing data visualisation
+library(viridis) # Nicer colour scheme options (with colour blind friendly choices)
 ```
 
 # Good Data Visualisation with R - Session 2
@@ -23,11 +26,13 @@ The second session focusses on some principles for using data visualisation in r
 
 We will also cover some basic data manipulation, so that you have the tools to get the most out of your data.
 
+I recommend the Fundamentals of [Data Visualization by Claus O. Wilke](https://clauswilke.com/dataviz/) for further tips on using data visualisation as a communication tool. It covers useful tips, tricks, and pitfalls to avoid. 
+
 ## Getting started
 
 So lets's get going! But before we get plotting, we will first inspect our data and understand what it is we might want to plot. 
 
-For the majority of this session, we will be working the Palmer Penguins data set (https://github.com/allisonhorst/palmerpenguins/tree/main). Think of it as the next step up for the Iris that we worked with last week ;)
+For the majority of this session, we will be working the Palmer Penguins data set (https://github.com/allisonhorst/palmerpenguins/tree/main). 
 
 ```{r penguins}
 
@@ -36,86 +41,198 @@ summary(penguins)
 head(penguins)
 ```
 
-![The Penguins](lter_penguins.png)
+![Palmer Penguins](https://raw.github.com/DCS-training/Good-Data-Visualisation-with-R/main/images/lter_penguins.png)
 
-Last week we focused mostly on plotting numeric Vs numeric data. But sometimes we categorically have to consider categories. This opens up whole new avenues and options for us, as we can start to consider representing percentages, means, medians, counts, and a whole bunch of other scenarios. We can also use the grammar approach of ggplot to layer different visualisations. Today we will be looking at our penguin dataset to compare between species, island and sex, and how these relate to penguin bodyweight. Let's have a look through our examples below:
+Last week we focused mostly on plotting numeric Vs numeric data. But sometimes we categorically have to consider categories. 
+
+This opens up whole new avenues and options for us, as we can start to consider representing percentages, means, medians, counts, and a whole bunch of other scenarios. 
+
+We can also use the grammar approach of ggplot to layer different visualisations. Today we will be looking at our penguin dataset to compare between species, island and sex, and how these relate to penguin bodyweight. We will start off with bar charts.
+
+## Bar Charts
+
+Nice, simple bar charts.... Bar charts are used to communicate count values and proportion values. Let's have a look at the different options we might have of presenting count and proportion values
+
+We have 3 main choices:
+* Stacked - the count data is stacked vertically in the bars.
+* Dodged - the count data is placed horizontally next to each other, in "dodged" bars.
+* Filled - the data is converted to a % value. The columns will range from 0% to 100%. Making it very useful to compare proportions of count data.
+
 
 ```{r example plots}
 
 #bar charts
 
-ggplot(penguins, 
-       aes(x = species, fill = species )) +
-  geom_bar() 
-
+## Default stack option - values are stacked on each other
 ggplot(penguins, 
        aes(x = island, fill = species )) +
-  geom_bar() 
+  geom_bar(position = "stack") 
 
+## Dodge position - the values are put side by side (i.e., they are dodged)
 ggplot(penguins, 
        aes(x = island, fill = species )) +
   geom_bar(position = "dodge") 
-```
 
-
-```{r}
-#boxplots
-
+## Fill position - where values are converted to proportional %
 ggplot(penguins, 
-       aes(x = species, y = body_mass_g )) +
-  geom_boxplot() #boxplot
-
-## We can also combine our geometries
-ggplot(penguins, 
-       aes(x = species, y = body_mass_g )) +
-  geom_violin(aes(color = species), fill = "grey5", alpha = .7) +
-   geom_dotplot(binaxis = "y",
-               stackdir = "center",
-               dotsize = 0.5,
-               alpha = .7, 
-               color = "white",
-               aes(fill = species))+
-  geom_boxplot(width = .5, alpha = .4) # alpha = transparency of item, width = width of item
-```
-
-```{r}
-## Or we can engage with Multi-group faceting
-ggplot(penguins, 
-       aes(x = species, y = body_mass_g, fill = sex )) +
-  geom_boxplot() +
-  facet_wrap(~island)
-
-ggplot(penguins, 
-       aes(x = species, y = body_mass_g , fill = sex)) +
-  geom_boxplot() +
-  facet_grid(~island ~sex) +
-  coord_flip()
-
- ggplot(penguins, 
        aes(x = island, fill = species )) +
-  geom_bar(position = "dodge") +
-   facet_wrap(~sex)
+  geom_bar(position = "fill") 
+
 
 ```
 
-Using the plots above, answer the following questions:
+### Task time : Bar charts for histograms
 
- * Which penguin species looks to be heaviest?
+We can also use bar charts to create histograms. This is because the bar chart uses count values to communicate the data. 
+
+Try it yourselves! In the code chunks below, replace `x = island`, with `x = body_mass_g` and see what you get in each of the 3 position options. 
+
+```{r task plots}
+
+#bar charts
+
+## Default stack option - values are stacked on each other
+ggplot(penguins, 
+       aes(x = island, fill = species )) +
+  geom_bar(position = "stack") 
+
+## Dodge position - the values are put side by side (i.e., they are dodged)
+ggplot(penguins, 
+       aes(x = island, fill = species )) +
+  geom_bar(position = "dodge") 
+
+## Fill position - where values are converted to proportional %
+ggplot(penguins, 
+       aes(x = island, fill = species )) +
+  geom_bar(position = "fill") 
+
+
+```
+
+Now let's make sense of these plots! 
+
+What do we think is being communicated in each of the 3 options?
+
+Under what circumstances would we use these options?
+
+
+
+## Column charts
+
+The counterpart to the bar chart,
+focuses on the column part. 
+
+The column chart is used when we want the height of the bars to represent values in the data. I tend to prefer using this option after doing some manual data wrangling (i.e., to calculate mean values). However, it is very effective at communicating the maximum values in our data when used without wrangling.
+
+
+Once again, we have the options to *stack*, *fill*, or *dodge* our values.
+
+### Geom columns without wrangling.
+
+```{r}
+## stacked
+ggplot(penguins, 
+       aes( x= island,
+            y = body_mass_g,
+            fill = species )) +
+  geom_col(position = "stack") #
+
+## dodged
+ggplot(penguins, 
+       aes( x= island,
+            y = body_mass_g,  
+            fill = species )) +
+  geom_col(position = "dodge") 
+
+## filled
+ggplot(penguins, 
+       aes( x= island,
+            y = body_mass_g,
+            fill = species)) +
+  geom_col(position = "fill") 
+
+```
+
+### Reflection tasks 
+
+* How effective were these charts are communicating the data? 
+
+* Under what circumstances would you choose the *stack*, *dodge*, or *fill options* for bar charts?
+
+* Under what circumstances would you choose the *stack*, *dodge*, or *fill options* for columns charts?
+
+
+## Boxplots
+
+Boxplots are useful when we want to visually communicate the distributions of a continuous variable within our data. We can also split it by categorical variables if it is important to us. Boxplots help go beyond the data communicated in the column charts, as they can represent more than just the peak of the data - they can do so much more.
+
+The boxplot is used to visualise 4 summary statistics within our chosen variables:
+* The median - the horizontal line in the boxplot.
+
+* The interquartile range - this is represented by the *box* of the boxplot. The upper part of the box is the 75th percentile, whilst the lower part of the box represents the 25th percentile. 
+
+* The whiskers - the whiskers extend from the box to value of 1.5 * the interquartile range.
+
+* Data beyond the the whiskers (outside 1.5 * the interquartile range) are considered to be "outlying" points. This can help us researchers identify if there is the presence of influential outliers.
+
+* We can also use the whiskers and/or the outliers to determine the minimum and maximum values in our data.
+
+Below, we will communicate our stats across the differnt position arguments.
+
+```{r}
+
+# default boxplot (this is "dodge2")
+ggplot(penguins, 
+       aes(x = island,
+           y = body_mass_g,
+           fill = species )
+       ) +
+  geom_boxplot( alpha = .7)
+
+# position set to dodge
+ggplot(penguins, 
+       aes(x = island,
+           y = body_mass_g,
+           fill = species )
+       ) +
+  geom_boxplot(position = "dodge", alpha = .7)
+
+# position set to identity
+ggplot(penguins, 
+       aes(x = island,
+           y = body_mass_g,
+           fill = species )
+       ) +
+  geom_boxplot(position = "identity", alpha = .7)
+
+
+
+```
+
+# Task time
+
+Make some plots in the code chunks below to help you answer the following questions:
+
+ * Which penguin species is heaviest?
  * Which sex of penguin tends to be heaviest?
- * Which island has the "biggest bois" of Adeile penguins?
+ * Which island has the lightest Adeile penguins?
+ 
+```{r}
 
-## Bonus missing detour 
+```
+
+
+## Bonus - visualising something that's missing
 
 Notice how this gives us a visualisation of our NA - we can supplement this with the naniar package if we want to better understand our missing variables
 
 ```{r missing visualisation}
-library(naniar)
+
 
 ggplot(penguins, 
-       aes(x = species, y = body_mass_g )) +
+       aes(y = body_mass_g ,x = flipper_length_mm)) +
   geom_miss_point( position = "jitter") + # used to visualise missing data
-  geom_boxplot( alpha = .7) + # using "alpha" to create a transparent boxplot
-  facet_grid(~island ~sex)
+  facet_wrap(~sex)
 ### So which species and in which island are there missing values?
 ```
 
@@ -128,8 +245,8 @@ To do so, we will need use some data wrangling to help create some data vis. Tha
 ```{r summarised_stats}
 
 penguins %>% 
-  group_by(island, species, sex ) %>%  # grouping by category # the hierarchy is important here
-  na.omit() %>% # be careful of removing na - this is just for a quick example
+  group_by(island, species ) %>%  # grouping by category # the hierarchy is important here
+  na.omit() %>% # be careful of removing na without inital checks
   summarise(sum = sum(body_mass_g), # summarised stats
             min = min(body_mass_g),
             max = max(body_mass_g),
@@ -137,34 +254,42 @@ penguins %>%
             sd = sd(body_mass_g),
             mean = mean(body_mass_g)) %>%
   ggplot( aes(
-    x = species, y = sum, fill = sex
+    x = species, y = mean , color = species
   )) +
- geom_col(position = "dodge") +
-  # geom_errorbar(aes(ymin = min, ymax = max), position = "dodge") +
-  facet_wrap(~island) # +
-  coord_flip()
+   geom_errorbar(aes(ymin = min, ymax = max), linewidth = 1.8) +
+   geom_point(size = 4, color = "black") +
+  facet_wrap(~island) 
 
 ```
 
 ## Plotting purely categorical data
 For this we will be relying on counts and percentages to provide the numbers needed. Again this will require some initial data wrangling.
 
+### The dreaded pie chart
+
+To make the pie chart, we need to do some customising.
+
+The plot starts with some initial data wrangling to create our percentage values needed for the pie chart.
+
+The base layer is the geom_bar, as we are using count/proportion data. The position this time is set to "identity".
+
+From there, we use the coord_polar to convert the chart to polar coordinates. First we set the theta to "y", so that R can identify the axis to map the angles to. 
+
+We're combining the plot with text this time, to address on the limitations of pie charts - in that the proportions are difficult to estimate. So we'll use `geom_text()` to provide our value labels. 
+
+Finally, `theme_void()` is used to declutter the space of the pie chart.
+
 ```{r}  
-  penguin_count <- penguins %>%
+  
+penguins %>%
     count(species) %>% 
-    mutate(percentage_p = n/nrow(penguins))
-head(penguin_count)
-
-```
-
-### The dreaded pie char
-
-```{r}  
-  ggplot(penguin_count, aes(x = "", 
-                       y = percentage_p, fill = species)) + 
+    mutate(percentage_p = n/nrow(penguins)) %>%
+ggplot( 
+  aes(x = "", y = percentage_p, fill = species)) + 
     geom_bar(stat="identity", width=1) +
-    coord_polar("y", start=0) + 
-    geom_text(aes(label = scales::percent(round(percentage_p, 3))), 
+    coord_polar(theta = "y") + 
+    geom_text(
+      aes(label = scales::percent(round(percentage_p, 3))), 
   position = position_stack(vjust = 0.5)) +
     theme_void()
 
@@ -179,20 +304,18 @@ The pie chart is dreaded because:
  
 ``` {r}
  
- island_count <- penguins %>% 
+penguins %>% 
   filter(sex != "NA") %>% 
       group_by(island, species, sex) %>% 
       summarise( n = n()) %>%
-  mutate(percent = n/sum(n))
-    head(island_count, 10)
-
-    ggplot(island_count, aes(x = "", 
-                              y = percent, fill = sex)) + 
+  mutate(percent = n/sum(n)) %>%
+    ggplot(
+      aes(x = "", y = percent, fill = sex)) + 
       geom_bar(stat="identity", width=1) +
-      coord_polar("y", start=0) + 
+      coord_polar("y") + 
       geom_text(aes(label = scales::percent(round(percent, 3))), 
                 position = position_stack(vjust = 0.5)) +
-      facet_wrap(~island~species) +
+      facet_wrap(~island~species, nrow = 1) +
     theme_void()
 
 ```
@@ -200,27 +323,17 @@ The pie chart is dreaded because:
 ### Alternatives to pie chart - bar charts 
 
 ```{r}    
-    ggplot(island_count, aes(x = species, 
-                             y = percent, 
-                             fill = island)) + 
+
+penguins %>% 
+  filter(sex != "NA") %>% 
+      group_by(island, species, sex) %>% 
+      summarise( n = n()) %>%
+  mutate(percent = n/sum(n)) %>%
+    ggplot(
+      aes(x = species, y = percent, fill = sex)) + 
       geom_bar(stat="identity", 
                position = "dodge") +
-  facet_wrap(~sex)
-    
-    ggplot(island_count, aes(x = reorder(species, percent), 
-                              y = percent,
-                              fill = species)) + 
-      geom_bar(stat="identity", 
-               position = "dodge") + 
-      geom_text(aes(label = scales::percent(round(percent, 3))),
-                position = position_stack(vjust = 0.5)) +
-      labs(x= "Species",
-           y = "Percentage %") +
-      coord_cartesian(ylim = c(.48, .52)) +
-      facet_wrap(~sex ~island )
-    
- 
-    
+  facet_wrap(~island)
 ```
 
 ### Comparing groups within populations
@@ -233,7 +346,7 @@ ggplot( aes(x = reorder(island, n),
                             y = n,
                             fill = species)) + 
     geom_bar(stat="identity", 
-             position = "dodge") + 
+             position = "dodge2") + 
       geom_text(aes(label = n, vjust = -.5), position = position_dodge(width = .9)) +
       labs(x= "species",
            y = "n")
@@ -242,144 +355,247 @@ ggplot( aes(x = reorder(island, n),
   
 ### Simplifying/de cluttering plot - dumbbell plot
 
+We can take the visualisation of categorical variables a step further, by using the dumbbell plot. 
 
-```{r}
+The dumbbell plot places a point on the corresponding value. We also connect a line between these points, to show their connections. As an extra, we're also labelling the value inside each end of the dumbbell.
+
+From there we can facet wrap to split our data by a third variable. 
+
+Then we play with the coordinates to maximise the communication of the data. We rescale the values of the y axis being displayed to have a nice zoomed in view. We also use the `coordflip()` to flip the axes around.
+
+The plot finishes with its labelling and theme choices. 
+
+The end result is a decluttered plot which
+
+```{r message = FALSE, warning = FALSE}
     penguins %>% 
-      group_by( island, species) %>% 
+      group_by( island, species, sex) %>% 
       summarise(n = n()) %>% na.omit() %>%
-      ggplot( aes(x = reorder(island, n), 
+      ggplot( aes(x = reorder(sex, n), 
                   y = n,
                  )) + 
-      geom_line(aes(group = island)) + # creating line in between the point for each island
-     geom_point(aes(color = species), size = 10) +# colouring each point by the species 
-  geom_text(aes(label = n, vjust = .5), size = 3) +
-  #facet_wrap(~sex) +
-  scale_y_continuous(limits = c(0, 150)) +
-      coord_flip() +
-  labs(color = "",
+      geom_line(aes(group = sex)) + # creating line in between the point for each sex
+     geom_point(aes(color = species), # colouring each point by the species
+                size = 10, alpha = .7 ) + 
+  geom_text(aes(label = n, vjust = .5), size = 3) + # labelling values
+  facet_wrap(~island, nrow = 3) + # faceting and choosing number of rows
+  scale_y_continuous(limits = c(0, 75)) + # changing the scale of values displayed
+      coord_flip() + # flipping the coordinates
+  labs(color = "", #labelling
        x = "Island",
        y = "Number of Penguins",
        title = "Penguin Distribution Plot") +
   theme_minimal(base_size = 15)+
-  theme(legend.position = "left")
+  theme(legend.position = "bottom")
 
 ```
 
-### Working with data with many categories
- 
- 
-Here we will be working with mpg dataset - as it contains a higher number of categories.
 
-Our aim is to find out which brand has the highest mpg. Our first step is to tidy the data. Our second will be to create a treemap to visualise the data.
 
+## Tasktime   
+
+We are going to try and recreate the plot from above, but with the diamonds dataset. 
+
+Your goal is to make a plot that communicates the mean value of the sale prices of different cuts of diamonds. So you will want to focus on the `cut` and `price` variables from the diamonds dataset.
+
+If you run out of time, or you want to work on this in your own space, we have included the solutions at the end of the worksheet.
+
+### Plot 1 - Can we plot the average price of each cut?
 ```{r}
-#instal.packages("treemapify")
-   library(treemapify)  
-    ?mpg
-    head(mpg)
-    summary(mpg)
-       
-data <- mpg %>% mutate(
-  manufacturer = as.factor(manufacturer),
-  model = as.factor(model)
-) %>% group_by(manufacturer) %>%
-  summarise(avg_hwy = mean(hwy)) %>% 
-  arrange(avg_hwy)
-data
-```
-
-```{r}
-  ggplot(data, aes(fill = avg_hwy, area = avg_hwy, label = manufacturer )) +
-  geom_treemap() +
-  geom_treemap_text(colour = "white",
-                    place = "centre",
-                    size = 10,
-                    grow = TRUE) +
-    scale_fill_viridis_c()
-```   
-
-### Task time 
-
-Now that we have identified the most efficent brand of car, can we find the most efficient car model?
-
-```{r}
-
-  data <- mpg %>% mutate(
-    manufacturer = as.factor(manufacturer),
-    model = as.factor(model)
-  ) %>% group_by(model) %>%
-    summarise(avg_hwy = mean(hwy)) %>%
-  arrange(avg_hwy)
-  data
-```
-
-```{r}
-  ggplot(data, aes(fill = avg_hwy, area = avg_hwy, label = model )) +
-    geom_treemap() +
-    geom_treemap_text(colour = "white",
-                      place = "centre",
-                      size = 5,
-                      grow = TRUE) +
-    scale_fill_viridis_c()
-
-
-```
-
-### Now to examine differences between 1999 and 2008
-
-```{r}
+  ?diamonds # To get the metadata
+  summary(diamonds) # to help identify variable names
   
-  data <- mpg %>% mutate(
-    manufacturer = as.factor(manufacturer),
-    model = as.factor(model),
-    year = as.factor(year)
-  ) %>% group_by(year, manufacturer) %>%
-    summarise(avg_hwy = mean(hwy)) %>% 
-  arrange(avg_hwy)
-  data
-  summary(data)
-```
-
-```{r}
-  ggplot(data, aes(fill = avg_hwy, area = avg_hwy, label = manufacturer )) +
-    geom_treemap() +
-    geom_treemap_text(colour = "white",
-                      place = "centre",
-                      size = 5,
-                      grow = TRUE) +
-    scale_fill_viridis_c() +
-    facet_wrap(~year)
+  
+  
   
 ```  
 
-So we were able to show off... but maybe the treeplot is too complex. It makes it hard to track differences. Time to go back to our dumbbell plot! 
-  
-```{r}
+### Plot 2 - Can we plot the average price of each colour of diamond within each cut
+```{r}  
 
-ggplot(data, aes(x = reorder(manufacturer, avg_hwy), 
-              y = avg_hwy)) + 
-    geom_line(aes(group = manufacturer)) + # creating line in between the point for each manufacturer
-    geom_point(aes(color = year), size = 6) + # colouring each point by the year
-    geom_text(aes(label = round(avg_hwy, 0)), size = 2) + # adding values to each point
-    labs(x = "",
-         y = "average miles per galon (mpg) on highway",
-         title = "Tracking vehicle effficency across different manufacturers",
-         color = "") +
-     coord_flip() +
-    theme_bw() +
-    theme(legend.position = "bottom")
+  
 
 ```
 
-* Which manufacturer was least efficient in 1999?
-* Which manufacturer lost efficiency between 1999 and 2008?
-* Which car has made the largest improvements in efficiency?
+### Plot 3 - Can we plot to find the proportion of each cut within the data?
+```{r}
+  
+  
+```
+ 
+### Plot 4 - How many of each color is there for each cut? (column chart and dumbbell  - which is best for this dataset?)
+
+#### 4a. Column chart 
+```{r}
+ 
+ 
+```
+
+#### 4b. Dumbell Chart
+```{r}
+
+```
 
 
+### Plot 5 - What if reviewer 2 is being silly, and wants us to plot proportions by cut, by color, and by clarity?.
+```{r}
 
-*****
+  
 
-## Fancy Plot Aims 
+```
+
+### Plot 6 - Can we make a plot to compare the mean price across cut, color and clarity of diamonds?
+```{r}
+
+  
+  
+  
+```  
+
+## Solutions to challenges above
+
+### Plot 1 - Can we plot the average price of each cut?
+```{r}
+
+  diamonds %>% 
+    group_by(cut) %>%
+    summarise(mean_price = mean(price)) %>%
+    arrange(desc(mean_price)) %>%
+    ggplot(
+      aes(x= reorder(cut, -mean_price) # this is an extra trick to reorder the plot.
+               , y = mean_price)) +
+    geom_col(aes(fill = cut))
+  
+```
+
+
+### Plot 2 - Can we plot the average price of each colour of diamond within each cut
+```{r}
+
+  
+  diamonds %>% 
+    group_by(cut, color) %>%
+    summarise(mean_price = mean(price)) %>%
+    ggplot(aes(x= reorder(cut, mean_price),
+               y = mean_price)) +
+    geom_col(aes(fill = color), position = "dodge") 
+```
+
+### Plot 3 - Can we plot to find the proportion of each cut within the data?
+```{r}
+
+  
+  diamonds %>%
+    count(cut) %>% 
+    mutate(percentage_cut = n/nrow(diamonds)) %>%
+   ggplot(
+     aes(x = reorder(cut, percentage_cut), 
+         y = percentage_cut,
+         fill = cut)
+     ) + 
+    geom_bar(stat="identity", 
+             position = "dodge")
+
+### OR the dreaded pie chart option ;)
+
+  diamonds%>%
+    count(cut) %>% 
+    mutate(percentage_p = n/nrow(diamonds)) %>%
+ggplot( 
+  aes(x = "", y = percentage_p, fill = cut)) + 
+    geom_bar(stat="identity", width=1) +
+    coord_polar(theta = "y") + 
+    geom_text(
+      aes(label = scales::percent(round(percentage_p, 3))), 
+  position = position_stack(vjust = 0.5)) +
+    theme_void() +
+    theme(legend.position = "top")
+
+```
+
+
+### Plot 4 - How many of each color is there for each cut? (column chart and dumbbell  - which is best for this dataset?)
+
+#### 4a. Column chart
+```{r}
+
+
+  # Column chart  
+  diamonds %>% 
+    group_by( cut, color) %>% 
+    summarise(n = n()) %>% na.omit() %>%
+    ggplot( aes(x = reorder(cut, n), 
+                y = n
+    )) + 
+    geom_col(position = "dodge", aes(fill = color)) +
+    coord_flip() +
+    theme(legend.position = "bottom") 
+```
+
+#### 4a. Dumbbell chart
+```{r}
+ 
+  diamonds %>% 
+    group_by( cut, color) %>% 
+    summarise(n = n()) %>% na.omit() %>%
+    ggplot( aes(x = reorder(cut, n), 
+                y = n
+    )) + 
+    geom_line(aes(group = cut)) +
+    geom_point(aes(color = color), size = 5, alpha = .7) +
+   geom_text(aes(label = color)) +
+    coord_flip() +
+    theme(legend.position = "") 
+```
+
+
+### Plot 5 - What if reviewer 2 is being silly, and wants us to plot proportions by cut, by color, and by clarity?.
+```{r}
+
+  
+  diamonds %>% 
+    group_by( cut, color, clarity) %>% 
+    summarise(n = n()) %>% na.omit() %>%
+    ggplot( aes(x = reorder(cut, n), 
+                y = n
+      )
+    ) + 
+    geom_col(position = "dodge" , 
+             aes(fill = color)) +
+    coord_flip() +
+    theme(legend.position = "bottom") +
+    facet_wrap(~clarity, ncol = 4)
+```
+
+
+### Plot 6 - Can we make a plot to compare the mean price across cut, color and clarity of diamonds?
+```{r}
+
+  
+  diamonds %>% 
+    group_by( cut, color, clarity) %>% 
+    summarise(n = n(),
+              mean_price = mean(price)) %>% na.omit() %>%
+    ggplot( aes(x = reorder(color, -mean_price), 
+                y = mean_price
+    )) + 
+    geom_col(position = "dodge", aes(fill = color)) +
+    theme(legend.position = "top",
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank(),
+          axis.title.y=element_blank()) +
+    labs(x = "",
+         y = "Mean Price") +
+    facet_grid(~clarity ~ cut) +
+    coord_flip() + 
+  guides(fill = guide_legend(ncol = 7, # changing the legend
+                             title.position = "top",
+                             title.hjust =0.5))
+  
+```  
+
+
+## Fancy Plot Time
 
 Now to for some technical extras.
 
@@ -387,8 +603,6 @@ Now to for some technical extras.
 *2 positioning percentage values inside chart
 *3 use different colours for different bars
 *4 learn how to place labels above bars
-
-
 
 
 This material is guided/inspired by Cedric Scherer. Please check out his amazing guides for further lessons on data vis using ggplot
@@ -402,7 +616,6 @@ This example will use the `starwars` dataset. Lets inspect the data before we mo
 
 ```{r}
 ?starwars 
-unique(starwars$homeworld)
 head(starwars)
 summary(starwars)
 ```
@@ -417,25 +630,36 @@ ggplot(starwars, aes(y = homeworld, x = after_stat(count / sum(count)))) +
 
 ```
 
+## Step 1 - Data wrangling
+
 As we can see, this is a little overwhelming. So lets do some data wrangling to simplify the data
 
 ```{r}
-strwrs<- starwars %>% select(homeworld) %>% #we are only interested in species 
+strwrs<- starwars %>% 
+  select(homeworld) %>% #we are only interested in homeworld
   mutate(homeworld = as.factor(homeworld)) %>% # mutating to factor
   group_by(homeworld) %>%  #grouping
-  summarise(prop = n()/nrow(starwars)) %>%  # creating proportion label
+  summarise(prop = n()/nrow(starwars)) %>%# creating proportion label
   mutate(
-         homeworld = forcats::fct_reorder(homeworld,prop, .desc = TRUE) #ordering data
-         ) %>% filter(prop > .015,
-           homeworld != "NA") %>% 
-  arrange(prop)# 
-head(strwrs)
-summary(strwrs$homeworld)
+         homeworld = forcats::fct_reorder(
+           homeworld,prop, # ordering homeworls by proportion
+           .desc = TRUE) # descending ordering data 
+         ) %>% filter(prop > .015, # removing lower values
+           homeworld != "NA" # removing NA values
+           ) %>% 
+  arrange(prop)
+
+strwrs %>% 
+  gt() %>% # gt for pretty table
+  fmt_number(decimals = 4) # formatting numbers in table
+
+
 
 ```
 
-# Step 2 - creating a basic bar chart
-## here we will feed our data manipulation from the previous step straight into ggplot to create a bar chart which communicates the proportion of diamond cuts visually.
+## Step 2 - creating a basic bar chart
+
+Here we will feed our data manipulation from the previous step straight into ggplot to create a bar chart which communicates the proportion of diamond cuts visually.
 
 ```{r}
 plot <- strwrs %>% 
@@ -448,7 +672,7 @@ plot
 
 In our bar chart, we can customise the axes. Have a think about which is most effective at communicating our data clearly. I prefer having categorical variables on the y axis, as it makes easier to read the category names, and makes it easier to vertically compare the proportions.
 
-### Step 3 - Adding some style to the visualisation.
+## Step 3 - Adding some style to the visualisation.
 
 At the moment, our plot is very functional. It communicates our data, and allows for comparisons between cuts (as we want). However there are some features that need improving - our labels are messy, and the decimal system of proportion can be confusing for some. Plus the overall visual style is a little dry and off putting. 
 
@@ -469,6 +693,10 @@ plot_2
 ```
 
 ### Step 3b - Setting a default theme and updating the theme
+
+Here we will temporarily change the default theme options for our session in R. This will save us time and code space for making our plots.
+
+If you want the default theme options back either run the `theme_set(theme())` command, or reset your R session.
 
 ```{r}
 theme_set(theme_minimal()) # Setting theme - change this back to theme if need to set back to default
@@ -512,7 +740,8 @@ plot_3 <- plot_2 +
     expand = expansion(add = c(.7, .1)) # Used to add space between bars and the x axis
   ) +
   theme(strip.text = element_text(
-    hjust = 0, margin = margin(1, 0, 1, 0), 
+    hjust = .02, # Used to adjust label position: 0 is left, 1 is right. Inbetwen values to choose specifically where to be.
+    margin = margin(1, 0, 1, 0), 
     size = rel(1.1), face = "bold"
   ))
 
@@ -524,13 +753,14 @@ plot_3
 ```{r}
 plot_4 <- plot_3 +
   geom_text(
-    aes(label = paste0("  ", # setting a blank space at start of label
-                       sprintf("%0.1f", #setting decimal places and sum
-                               prop * 100),
+    aes(
+      label = paste0("  ", # setting a blank space at start of label
+         sprintf("%0.1f", #setting decimal places 
+                  prop * 100), # our caluculation
                        "%  "), # setting symbol, and space at end of label
         color = prop > .03, # setting colour rule for prop values greater than .03
         hjust = prop > .03), # setting horizontal rule for prop values greater than .03
-    size = 4, fontface = "bold" # setting font size and "bold"
+    size = 3.5, fontface = "bold" # setting font size and "bold"
   ) +
   scale_color_manual(
     values = c("black", "white"), # setting colours for rules set above
@@ -556,8 +786,8 @@ fancy_plot <- starwars %>% select(homeworld) %>% #we are only interested in spec
    prop == max(prop) ~ "green4",
    prop == min(prop) ~ "red4",
    prop > min(prop) & prop <max(prop) ~ "gray60"
- ),
- cut = forcats::fct_reorder(homeworld, prop, .desc = TRUE)) %>% 
+ )
+ ) %>% 
   ggplot(aes(x =prop, y = homeworld, fill = col)) + #here specifying we want color set by our colour rules
   geom_col() +
   geom_text(
@@ -575,12 +805,12 @@ fancy_plot <- starwars %>% select(homeworld) %>% #we are only interested in spec
     values = c("black", "white"),
     guide = "none") +
   scale_fill_identity(guide = "none") + # Setting guide to "none" to remove legend
-  facet_wrap(~ cut, ncol = 1, scales = "free_y")+
+  facet_wrap(~ homeworld, ncol = 1, scales = "free_y")+
   scale_y_discrete(guide = "none", 
     expand = expansion(add = c(.6, .01)) 
   ) +
   theme(strip.text = element_text(
-    hjust = 0, margin = margin(1, 0, 1, 0), 
+    hjust = 0.03, margin = margin(1, 0, 1, 0), 
     size = rel(1.1), face = "bold"
   ))+
    labs(title = "Our Pretty Barchart - Starwars Homeplanets")
@@ -588,210 +818,3 @@ fancy_plot <- starwars %>% select(homeworld) %>% #we are only interested in spec
 fancy_plot
 ```
 
-
-
-## Playtime for consolidation again!  This time with the diamonds dataset (Answers below)
-
-```{r}
-  ?diamonds
-  summary(diamonds)
-  
-  # Plot 1 - average price of each cut
-  
-  diamonds %>% 
-    group_by(...) %>%
-    summarise(mean_price = mean(price)) %>%
-    ggplot(aes(x= reorder(...,mean_price)
-               , y = ...)) +
-    geom_col(aes(fill = cut))
-```  
-
-```{r}  
-  # Plot 2 - average price of each colour of diamond within each cut
-  
-  diamonds %>% 
-    group_by(cut, ...) %>%
-    summarise(mean_depth = mean(...)) %>%
-    ggplot(aes(x= reorder(cut,mean_depth),
-               y = mean_depth)) +
-    geom_col(aes(fill = ...), position = "dodge") 
-```
-
-```{r}
-  # Plot 3 - What is the proportion of each cut?
-  
-  diamond_prop <- diamonds %>%
-    count(...) %>% 
-    mutate(percentage_cut = n/nrow(diamonds))
-  head(diamond_prop)
-  
-  ggplot(diamond_prop, aes(x = ...(... , percentage_cut), # think about whether reordering is useful here... (but also compare with and without)
-                            y = percentage_cut,
-                            fill = ...)) + 
-    geom_bar(stat="identity", 
-             position = "...") 
- 
-  # How many of each color is there for each cut? (column chart and dumbbell  - which is best for this dataset?)
-```
-
-```{r}
-  # Column chart  
-  diamonds %>% 
-    group_by( cut, color) %>% 
-    summarise(n = n()) %>% na.omit() %>%
-    ggplot( aes(x = reorder(cut, n), 
-                y = ...
-    )) + 
-    geom_col(position = "...", aes(fill = color)) +
-    coord_flip() +
-    theme(legend.position = "bottom") 
-```
-
-```{r}
-  #dumbbell chart
-  diamonds %>% 
-    group_by( cut, ...) %>% 
-    summarise(n = n()) %>% na.omit() %>%
-    ggplot( aes(x = reorder(cut, ...), 
-                y = ...
-    )) + 
-    geom_line(aes(group = cut)) +
-    geom_point(aes(color = ...), size = 5, alpha = .7) +
-   geom_text(aes(label = ...)) +
-    coord_flip() +
-    theme(legend.position = "") 
-```
-
-```{r}
-  ## What if reviewer 2 is being silly, and wants us to split by cut, by color, and by clarity (the triple c).
-  
-  diamonds %>% 
-    group_by( cut, color, ...) %>% 
-    summarise(n = n()) %>% na.omit() %>%
-    ggplot( aes(x = reorder(cut, n), 
-                y = n
-    )) + 
-    geom_col(position = "dodge" , aes(fill = ...)) +
-    coord_flip() +
-    theme(legend.position = "bottom") +
-    facet_wrap(~..., ncol = 4)
-```
-
-```{r}
-  ## Within the triple C (cut, color, clarity), which sub-sub group has the most expensive diamonds? (on average)
-  
-  diamonds %>% 
-    group_by( cut, color, ...) %>% 
-    summarise(n = n(),
-              mean_price = mean(...)) %>% na.omit() %>%
-    ggplot( aes(x = reorder(cut, ...), 
-                y = mean_price
-    )) + 
-    geom_col(position = "dodge", aes(fill = ...)) +
-    theme(legend.position = "bottom") +
-    facet_grid(. ~...) +
-    coord_flip() 
-  
-```  
-
-### Answers to challenges above
-
-```{r}
- # Plot 1 - average price of each cut
-  
-  diamonds %>% 
-    group_by(cut) %>%
-    summarise(mean_price = mean(price)) %>%
-    ggplot(aes(x= reorder(cut ,mean_price)
-               , y = cut)) +
-    geom_col(aes(fill = cut))
-  
-```
-
-```{r}
-  # Plot 2 - average price of each colour of diamond within each cut
-  
-  diamonds %>% 
-    group_by(cut, color) %>%
-    summarise(mean_depth = mean(price)) %>%
-    ggplot(aes(x= reorder(cut, mean_depth),
-               y = mean_depth)) +
-    geom_col(aes(fill = color), position = "dodge") 
-```
-
-```{r}
-  # Plot 3 - What is the proportion of each cut?
-  
-  diamond_prop <- diamonds %>%
-    count(cut) %>% 
-    mutate(percentage_cut = n/nrow(diamonds))
-  head(diamond_prop)
-```
-
-```{r}
-  ggplot(diamond_prop, aes(x = reorder(cut, percentage_cut), # think about whether reordering is useful here... (but also compare with and without)
-                            y = percentage_cut,
-                            fill = cut)) + 
-    geom_bar(stat="identity", 
-             position = "dodge") 
-```
-
-```{r}
-  # How many of each color is there for each cut? (column chart and dumbbell please - which is best for this dataset?)
-
-  # Column chart  
-  diamonds %>% 
-    group_by( cut, color) %>% 
-    summarise(n = n()) %>% na.omit() %>%
-    ggplot( aes(x = reorder(cut, n), 
-                y = n
-    )) + 
-    geom_col(position = "dodge", aes(fill = color)) +
-    coord_flip() +
-    theme(legend.position = "bottom") 
-  
-  #dumbbell chart
-  diamonds %>% 
-    group_by( cut, color) %>% 
-    summarise(n = n()) %>% na.omit() %>%
-    ggplot( aes(x = reorder(cut, n), 
-                y = n
-    )) + 
-    geom_line(aes(group = cut)) +
-    geom_point(aes(color = color), size = 5, alpha = .7) +
-   geom_text(aes(label = color)) +
-    coord_flip() +
-    theme(legend.position = "") 
-```
-
-```{r}
-  ## What if reviewer 2 is being silly, and wants us to split by cut, by color, and by clarity (the triple c).
-  
-  diamonds %>% 
-    group_by( cut, color, clarity) %>% 
-    summarise(n = n()) %>% na.omit() %>%
-    ggplot( aes(x = reorder(cut, n), 
-                y = n
-    )) + 
-    geom_col(position = "dodge" , aes(fill = color)) +
-    coord_flip() +
-    theme(legend.position = "bottom") +
-    facet_wrap(~clarity, ncol = 4)
-```
-
-```{r}
-  ## Within the triple C (cut, color, clarity), which sub-sub group has the most expensive diamonds? (on average)
-  
-  diamonds %>% 
-    group_by( cut, color, clarity) %>% 
-    summarise(n = n(),
-              mean_price = mean(price)) %>% na.omit() %>%
-    ggplot( aes(x = reorder(cut, mean_price), 
-                y = mean_price
-    )) + 
-    geom_col(position = "dodge", aes(fill = color)) +
-    theme(legend.position = "bottom") +
-    facet_grid(. ~clarity) +
-    coord_flip() 
-  
-```  

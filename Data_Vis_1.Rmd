@@ -7,8 +7,17 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+# install.packages(c("tidyverse", "gridExtra", "palmerpenguins", "gt", "viridis", "jtools", "psych"))
+
 library(tidyverse) # Plotting and data tidying
 library(gridExtra) # Allows us to arrange plots side by side
+library(palmerpenguins) # Penguin dataset for end tasks
+library(gt) # Prettier tables
+library(viridis) # Nicer colour scheme options (with colour blind friendly choices)
+library(jtools) # Publication ready themes
+library(psych) # Quick and easy exploratory visualisations
+
 ```
 
 # Good Data Visualisation with R - Session 1
@@ -53,7 +62,7 @@ Today we will be using the dataset workhorse of the datascience world - the **Ir
 
 So lets have a look at our Iris data. 
 ```{r data}
-library(tidyverse)
+
 head(iris)
 summary(iris)
 
@@ -362,7 +371,7 @@ I'm a fan of using the viridis color packages, as they are designed to increase 
 
 ```{r}
 # Viridis palletes - 
-library(viridis)
+
 plot_a +
   scale_colour_viridis(discrete = TRUE,
                          option = "viridis")
@@ -454,6 +463,7 @@ hist(iris$Sepal.Width)
 # Using pairs.panels function from psych
 #install.packages("psych")
 library(psych)
+
 pairs.panels(iris, # data 
              bg=c("blue", "red", "yellow")[factor(iris$Species)], # setting colours for factors
              digits = 3, # setting digits
@@ -486,7 +496,7 @@ Don't forget to use `summary()` on the dataset to identify the variables you wan
 
 ```{r playtime}
 
-library(palmerpenguins)  
+ 
   summary(penguins)
   
   # standard scatter plot
@@ -617,8 +627,7 @@ Let's get going! We'll work with the `gt` package this time, and stick with the 
 ### Basic table
 
 ```{r tables}
-#install.packages("gt")
-library(gt)
+
 
 # Summary table - basic
 Iris_table <- iris %>% 
@@ -630,7 +639,7 @@ Iris_table <- iris %>%
     SD = sd(Petal.Length)
   )
 
-Iris_table
+Iris_table %>% gt()
 
 ```
 
