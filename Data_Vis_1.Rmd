@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-# install.packages(c("tidyverse", "gridExtra", "palmerpenguins", "gt", "viridis", "jtools", "psych"))
+# install.packages(c("tidyverse", "gridExtra", "palmerpenguins", "gt", "viridis", "jtools", "psych")) # delete initial comment and run code if library commands do not work.
 
 library(tidyverse) # Plotting and data tidying
 library(gridExtra) # Allows us to arrange plots side by side
@@ -56,7 +56,7 @@ So I've started backwards with the why to the **grammar of graphics**. Time to m
 
 Today we will work through each of the layers, one by one. The aim of this is to highlight how the grammar of graphics is used. (We may also show how sometimes we can bend the rules, so we can go beyond the recipe book and start cooking up any tasty plot our heart desires).
 
-### Layer 1 - The data
+## Layer 1 - The data
 
 Today we will be using the dataset workhorse of the datascience world - the **Iris** dataset. Iris a nice tidy data set, so there will be minimal datawrangling. This way we can focus on the data vis. 
 
@@ -82,7 +82,7 @@ We have told R where want it to look to start the data vis. This is the foundati
 
 Now we need to add the second layer of aesthetics into the ggplot mix.
 
-### Layer 2 - Aestectics
+## Layer 2 - Aestectics
 
 Our first layer was about establishing the data - the core mix of the ingredients. Now we want to set our second layer - the aesthetics. This is our opportunity to tell ggplot what it is in our data we want to plot. 
 
@@ -95,7 +95,7 @@ ggplot(data = iris,
 
 ```
 
-### Layer 3 - The Geometry Layer
+## Layer 3 - The Geometry Layer
 
 Time to connect the dots between `x` and `y` - quite literally this time as we are using `geom_point()`. Notice how we _add_ the additional _layer_ with the `+` sign. 
 
@@ -120,7 +120,7 @@ ggplot(data = iris,
 
 ```
 
-### Layer 4 - The Facet layer
+## Layer 4 - The Facet layer
 
 Here we get a little bit extra creative freedom over our decision making - some of which will be difficult to see until we add our `statistics` layer. And in case you were wondering, to `facet` is to highlight the subgroups within your dataset. In this case, it will be the `species` of the `iris` flowers. However, in more complicated analyses, you might find multiple faceting groups - especially within hierarchical data groups.
 
@@ -128,7 +128,7 @@ It is also worth being aware that sometimes this step can be applied after your 
 
 Anyhow - onto the various ways in which we can `facet` our data. 
 
-#### Option a) facet wrap
+### Option a) facet wrap
 
 ```{r facetwrap}
 ggplot(data = iris,
@@ -138,7 +138,7 @@ ggplot(data = iris,
 
 ```
 
-#### Option b) - using color 
+### Option b) - using color 
 
 The 2 options below achieve the same at this stage, but will have subtle differences when it comes to adding the statistic later. We can also define as `shape` or `size` instead of color if we want to (or all at once!).  
 
@@ -154,7 +154,7 @@ ggplot(data = iris,
   geom_point(aes(color = Species))
 ```
 
-#### Option c) - combining facet and color and shape
+### Option c) - combining facet and color and shape
 
 ```{r combinedfacet}
 ggplot(data = iris,
@@ -169,11 +169,11 @@ We are exploring this association as our aim of the visualisation is to visually
 
 If you want a *"hint"*, we'll need to a statistic layer to the plot.
 
-### Layer 5 - The Statistic Layer
+## Layer 5 - The Statistic Layer
 
 Here we will learn how we can add a statistic to model the data. Whilst this can help provide us with us additional insights into our data, we do need to exercise some caution when interpreting the data (We'll see why via the Simpson paradox...). 
 
-####  Default model
+###  Default model
 ```{r loess}
 ggplot(iris,
        aes(x = Sepal.Width, y = Petal.Length, color = Species )) + 
@@ -181,7 +181,7 @@ ggplot(iris,
   geom_smooth() # default is loess - which is a local regression (flexible). To get a linear model, we need to specify `method = "lm"` in the geom_smooth() function.
 ```
 
-## Spotting paradoxes with data visualisation 
+### Spotting paradoxes with data visualisation 
 
 Here will be setting a `linear model` for our statistic, and demonstrating the **2** ways in which the linear model can be applied to our data. 
 
@@ -195,6 +195,8 @@ Which plot do we think best represents the research? ;)
 
 For more information on this paradox, read up on the [Simpson paradox](https://en.wikipedia.org/wiki/Simpson%27s_paradox).
 
+###  No interaction present
+
 ```{r simpson_paradox}
 plot_a <- ggplot(iris,
        aes(x = Sepal.Width, y = Petal.Length )) + 
@@ -203,6 +205,7 @@ plot_a <- ggplot(iris,
   theme(legend.position = "bottom") # Here we are setting the legend position to the bottom of the screen to make a tidier plot
 plot_a
 ```
+### Interaction in the statistical model 
 
 ```{r}
 plot_b <- ggplot(iris,
@@ -213,12 +216,13 @@ plot_b <- ggplot(iris,
 
 plot_b
 ```
+### Comparing plots
 
 ```{r}
 grid.arrange(plot_a, plot_b, ncol=2)
 ```
 
-#### Bonus - Plotting data to represent our models
+### Bonus - Plotting data to represent our models
 
 Our first step here is to set the parameters for our customisable statistic model... which is actually a lot easier than it sounds/reads. 
 
@@ -245,7 +249,6 @@ plot_c <- ggplot(iris_new,
 grid.arrange(plot_a, plot_b, plot_c, ncol=3)
 ```
 
-Which of the above statistical models does this plot represent? 
 
 ## Layer 6 - The coordinates layer
 
@@ -276,7 +279,7 @@ ggplot(iris,
 
 I love `coord_flip()`. However, it's main purpose is somewhat wasted here. It's main benefit is if you want to plot categorical against numerical data. We will demonstrate all of these scenarios below.
 
-##### Coordflip on continuous data
+#### Coordflip on continuous data
 
 ```{r coord_flip_cont}
 
@@ -346,7 +349,7 @@ plot_b
 grid.arrange(plot_b, fixed_coord_plot, ncol = 2)
 ```
 
-### Layer 7 - The Theme layer
+## Layer 7 - The Theme layer
 
 This is the final step - the theme. This is essentially the decorative stage of the plot, and is a vital component of ensuring our plot can be interpreted clearly and accurately.
 
@@ -386,7 +389,7 @@ plot_a +
 ```
 
 
-#### Using set themes
+### Using set themes
 
 A full list of the set themes can be found here: https://ggplot2.tidyverse.org/reference/ggtheme.html 
 
@@ -399,7 +402,7 @@ plot_a +
 
 ```
 
-#### Customising our themes
+### Customising our themes
 
 We can also combine themes! And you can use the theme commands to customise features of the theme.
 
@@ -411,7 +414,7 @@ plot_a +
 
 ```
 
-#### Publication ready themes
+### Publication ready themes
 
 ```{r}
 
@@ -422,7 +425,7 @@ plot_a +
 
 ```
 
-#### Adding labels
+### Adding labels
 
 ```{r}
 
@@ -443,7 +446,7 @@ plot_a +
 
 
 
-### Exporting 
+## Exporting 
 
 And there we have it! All the layers, to our highly regarded expectations of what our plot should look like. But how do we export it?
 
@@ -575,9 +578,6 @@ Don't forget to use `summary()` on the dataset to identify the variables you wan
 ```{r}
 
 ```
-
-
-
 
 
 ## Additional Bonus material - Automated Plots, and fancy tables
