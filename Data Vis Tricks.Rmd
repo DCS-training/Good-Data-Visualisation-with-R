@@ -1,0 +1,448 @@
+---
+title: "Data Vis tricks - Bonus Materials"
+author: "Rhys Davies"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse) # data manipulation and data cleaning
+library(gt) # pretty tables
+library(palmerpenguins) # Palmer penguins dataset
+library(viridis) # colour blind friendly pallate
+library(plotly) # use to turn ggplot objects into interactive plots
+```
+
+
+## Additional Bonus material - Automated Plots, fancy tables, fancy plot, and interactive plots
+ 
+## Automated Plots
+
+Congratulations! For those of you who made it down here, you will have stumbled upon the code to to start making functions for your plots. Making functions to create your plots allows you to automate your plot desires. This is a little more advanced, but don't let that scare you. Use it as a template, and then play around with it to see what does what.
+
+```{r}
+  # Automated Penguin Plot 
+  ## Please use this as a template to experiment with! Change the variables, and see what you can make of it.
+  
+  plot_penguin <- function(my_species) {
+  penguins %>%
+      na.omit() %>%
+    filter(species == my_species) %>% # Try replacing the ggplot code from with your own ggplot code here: 
+    ggplot(aes(x = bill_length_mm, y = bill_depth_mm, 
+               color = sex)) +
+    geom_point() +
+    geom_smooth(method = "lm") +
+    theme_minimal(base_size = 15) +
+      theme(legend.position = "bottom") +
+      labs(x = "Bill Length (mm)",
+           y = "Bill Depth (mm)",
+           subtitle = my_species,
+           title = "Sex Differences within Penguin Species") 
+  }
+  
+  # Species names: Adelie , Chinstrap , Gentoo - just copy and paste into the function below!
+  plot_penguin(my_species = "Adelie")
+
+```
+
+## Fancy tables with plots integrated
+
+This next section is inspired from a blog lesson from: https://rfortherestofus.com/2023/10/ggplots-in-gt-tables 
+
+An often overlooked aspect of data visualisation is table creation. This can be awkward when jumping into R, as we lose the ability to click, drage, and merge in the ways we are used to. But thankfully, there are packages that can be used to facilitate this. In this bonus section, we learn to do the following:
+
+* Create a summary statistics table.
+* Make the table pretty.
+* Include distribution plots into the table.
+* Create a function to automate the the distribution plots (this can be used in other scenario's as well).
+
+Let's get going! We'll work with the `gt` package this time, and stick with the `Iris` dataset. Let's imagine we want to create a summary table of the **Petal Length** across the iris **Species**.
+
+### Basic table
+
+```{r tables}
+
+
+# Summary table - basic
+Iris_table <- iris %>% 
+  group_by(Species) %>%
+  summarise(
+    min = min(Petal.Length),
+    mean = mean(Petal.Length),
+    max = max(Petal.Length),
+    SD = sd(Petal.Length)
+  )
+
+Iris_table %>% gt()
+
+```
+
+### Pretty table
+
+```{r}
+
+Iris_table %>% 
+  gt() %>%
+  tab_spanner(
+    label = 'Iris Petal Length', #title for merged header
+    columns = -Species #Not to include species
+  ) %>%
+  cols_label_with(fn = str_to_title) %>% #changing start of each word to upper case
+  fmt_number(decimals = 2) %>% # restricting to 2 decimal places
+  cols_align('left', columns = Species) # left aliging Species column to improve readability
+
+```
+
+### Getting funky with plots
+
+So we now have a pretty table that gives us an approximation of the distribution. But how can we improve this? With our good old friend data visualisation. 
+
+These next steps will be focused on creating a distribution plot for each species, which we can then include into the table. This will require some data manipulation for each species... but we're gonna learn a trick to streamline this process for us.
+
+```{r}
+
+Setosa_data <- iris %>% 
+  filter(Species == "setosa")
+
+Setosa_data %>% 
+  ggplot(aes(x= Petal.Length, y = Species)) +
+  geom_violin(fill = "#00FFFF")
+
+Setosa_data %>% 
+  ggplot(aes(x= Petal.Length, y = Species)) +
+  geom_violin(fill = "#00FFFF") +
+  theme_void() # using theme_void() to declutter plot, so that it fits nicely in table.
+
+```
+
+So above is the code for our `setosa` species. Thankfully, there are only 3 species in this data set. But what if we a larger dataset? That would involve a whole load of copy and pasting. It would also make it messy to fit the code into our table. 
+
+To get around this problem, we are going to create function that will automate the process for us.
+
+### Plotting function
+
+```{r plot_function}
+
+# Step 1 - creating a function
+plot_violin_species <- function(my_species) { # naming our input for the function
+  full_range <- iris %>%
+    pull(Petal.Length) %>%
+    range(na.rm = TRUE) # creating a range variable 
+  
+  iris %>% # specifiying the commands of the function
+    filter(Species == my_species) %>%
+    ggplot(aes(x = Petal.Length, y = Species)) +
+    geom_violin(fill = '#00FFFF') +
+    theme_void() +
+    coord_cartesian(xlim = full_range) + # adding this so every distribution is set to the same scale 
+    labs(x = "",
+         y = "")
+}
+
+# Step 2 - testing the function
+
+plot_violin_species(my_species = "setosa")
+plot_violin_species(my_species = "versicolor")
+plot_violin_species(my_species = "virginica")
+
+ 
+```
+
+### Adding plots to the table
+
+Now that we have our automated plot code, we can work to add it into our pretty summary table. This will include some function creating again. It will also require us to transform our `ggplot` items into `image` formats - as `gt()` doesn't know what to do with `ggplot` items. Thankfully, all that's needed is a line of code!
+
+```{r}
+fancy_table <- Iris_table %>%
+  mutate(Distribution = Species) %>%
+  gt() %>% 
+  tab_spanner(
+    label = 'Iris Petal Width', #title for merged header
+    columns = -Species #Not to include species
+  ) %>%
+  cols_label_with(fn = str_to_title) %>% #changing start of each word to upper case
+  fmt_number(decimals = 2) %>% # restricting to 2 decimal places
+  cols_align('left', columns = Species) %>% 
+  text_transform(
+    locations = cells_body(columns = 'Distribution'),
+    fn = function(column) {
+      map(column, plot_violin_species) %>% 
+        ggplot_image(height = px(40), aspect_ratio = 2.5)
+    }
+  ) 
+
+fancy_table
+
+```
+
+So there's a few complicated things going on here. But here's our approach to simplify:
+
+* First, text_transform() needs to know the locations of the cells that we want to transform. This information comes from cells_body(columns = 'Distribution') .
+
+* Second, text_transform() needs a function that takes the whole data that is stored in the “Distribution” column and generates images from this. That function is defined in the last segment of the code above (the `function(column) {...` part of the code.
+
+```{r }
+
+function(column) {
+  map(column, plot_violin_species) %>%
+    ggplot_image(height = px(50), aspect_ratio = 3) # we can play with the numbers here to size our plots
+}
+
+```
+
+This function does two things:
+
+1.  map() applies plot_violin_species() for every species. This will give us a list of ggplot-objects . This is not what text_transform() wants. It wants images.
+
+2. the list of ggplot-objects is turned into images with the convenient ggplot_image() function from gt .
+
+The end result is our fancy table with the plots included:
+
+```{r fancy_table}
+
+fancy_table
+
+```
+
+
+## Fancy Plot Time
+
+Now to for some technical extras.
+
+*1 calculate percentages
+*2 positioning percentage values inside chart
+*3 use different colours for different bars
+*4 learn how to place labels above bars
+
+
+This material is guided/inspired by Cedric Scherer. Please check out his amazing guides for further lessons on data vis using ggplot
+ 
+https://www.cedricscherer.com/2023/10/26/yet-another-how-to-on-labelling-bar-graphs-in-ggplot2/
+   
+ https://www.cedricscherer.com/
+
+### Data preparation
+This example will use the `starwars` dataset. Lets inspect the data before we move on. 
+
+```{r}
+?starwars 
+head(starwars)
+summary(starwars)
+```
+
+Let's say we want to plot the proportion of each homeworld in starwars. Our first step is to perform some data manipulation using our trusty tidyverse tools.
+
+ We can also run our calculations inside ggplot if needed - here using the after_stat() function.
+
+```{r}
+ggplot(starwars, aes(y = homeworld, x = after_stat(count / sum(count)))) +
+  geom_bar()
+
+```
+
+### Step 1 - Data wrangling
+
+As we can see, this is a little overwhelming. So lets do some data wrangling to simplify the data
+
+```{r}
+strwrs<- starwars %>% 
+  select(homeworld) %>% #we are only interested in homeworld
+  mutate(homeworld = as.factor(homeworld)) %>% # mutating to factor
+  group_by(homeworld) %>%  #grouping
+  summarise(prop = n()/nrow(starwars)) %>%# creating proportion label
+  mutate(
+         homeworld = forcats::fct_reorder(
+           homeworld,prop, # ordering homeworls by proportion
+           .desc = TRUE) # descending ordering data 
+         ) %>% filter(prop > .015, # removing lower values
+           homeworld != "NA" # removing NA values
+           ) %>% 
+  arrange(prop)
+
+strwrs %>% 
+  gt() %>% # gt for pretty table
+  fmt_number(decimals = 4) # formatting numbers in table
+
+
+
+```
+
+### Step 2 - creating a basic bar chart
+
+Here we will feed our data manipulation from the previous step straight into ggplot to create a bar chart which communicates the proportion of diamond cuts visually.
+
+```{r}
+plot <- strwrs %>% 
+  ggplot(aes(x =prop, y = homeworld)) + #adding the ggplot to select our variables (we can play with x and y alignment here),
+  geom_col() # using geom_col() to create our bar chart.
+
+plot
+
+```
+
+In our bar chart, we can customise the axes. Have a think about which is most effective at communicating our data clearly. I prefer having categorical variables on the y axis, as it makes easier to read the category names, and makes it easier to vertically compare the proportions.
+
+### Step 3 - Adding some style to the visualisation.
+
+At the moment, our plot is very functional. It communicates our data, and allows for comparisons between cuts (as we want). However there are some features that need improving - our labels are messy, and the decimal system of proportion can be confusing for some. Plus the overall visual style is a little dry and off putting. 
+
+So lets address this in two stages - 1st by playing with the lables. And 2nd by playing with the theme.
+
+#### Step 3a - updating labels.
+
+```{r}
+plot_2 <- plot +
+  scale_x_continuous( # scale_x_continuous() for manipulating the x axis.
+    expand = c(0, 0), limits = c(0, .13), # Setting limits to min and max ranges
+    labels = scales::label_percent(), # converting proportion to %
+    name = "Percentage" # Renaming x axis to "Proportion"
+  ) 
+
+plot_2
+
+```
+
+#### Step 3b - Setting a default theme and updating the theme
+
+Here we will temporarily change the default theme options for our session in R. This will save us time and code space for making our plots.
+
+If you want the default theme options back either run the `theme_set(theme())` command, or reset your R session.
+
+```{r}
+theme_set(theme_minimal()) # Setting theme - change this back to theme if need to set back to default
+
+theme_update( # updating/customising the theme
+  panel.grid.minor = element_blank(),
+  panel.grid.major = element_blank(),
+  axis.line.x = element_line(color = "grey80", linewidth = .4),
+  axis.ticks.x = element_line(color = "grey80", linewidth = .4),
+  axis.title.y = element_blank(), # using element blank to remove the y label
+  plot.margin = margin(10, 15, 10, 15)
+)
+
+plot_2
+```
+
+### Step 4 -placing category labels on top of each bar
+
+So now we have a tidy plot, with some clearer visuals. But we still have some steps left to improve. Our first step will be play with the category labels so that they hover above their corresponding bar. This will be done with faceting.
+
+```{r}
+plot_2 + 
+  facet_wrap(~homeworld)
+```
+
+We see that this has most definitely made things worse. But have some faith! We can make some minor adjustments to the facet command to get closer to what we want. Here we set the ncols to 1 (so it's stored in one column), and set scales to "free_y" so that our y axis is clearer. free_y will free the axis range, and remove redundant empty groups - which provides additional white space.
+
+```{r}
+plot_2 +
+  facet_wrap(~ homeworld, ncol = 1, scales = "free_y")
+
+```
+
+Our next step is to clean the y axis labels - we will also bold the text on the labelled data.
+
+```{r}
+plot_3 <- plot_2 +
+  facet_wrap(~ homeworld, ncol = 1, scales = "free_y")  +
+  scale_y_discrete(
+    guide = "none", # using this to remove y label 
+    expand = expansion(add = c(.7, .1)) # Used to add space between bars and the x axis
+  ) +
+  theme(strip.text = element_text(
+    hjust = .02, # Used to adjust label position: 0 is left, 1 is right. Inbetwen values to choose specifically where to be.
+    margin = margin(1, 0, 1, 0), 
+    size = rel(1.1), face = "bold"
+  ))
+
+plot_3
+```
+
+### Adding percentage labels to plot 
+
+```{r}
+plot_4 <- plot_3 +
+  geom_text(
+    aes(
+      label = paste0("  ", # setting a blank space at start of label
+         sprintf("%0.1f", #setting decimal places 
+                  prop * 100), # our caluculation
+                       "%  "), # setting symbol, and space at end of label
+        color = prop > .03, # setting colour rule for prop values greater than .03
+        hjust = prop > .03), # setting horizontal rule for prop values greater than .03
+    size = 3.5, fontface = "bold" # setting font size and "bold"
+  ) +
+  scale_color_manual(
+    values = c("black", "white"), # setting colours for rules set above
+    guide = "none") # removing colour legend
+
+plot_4
+```
+
+### Selectively colouring/highlighting top and bottom ranked categories 
+
+Here we are going back to our original plot code to customise the the geom_col() command. We will also add a new scale_fill_manual() command to customise the fill colour choices.
+
+```{r}
+fancy_plot <- starwars %>% select(homeworld) %>% #we are only interested in species 
+  mutate(homeworld = as.factor(homeworld)) %>% # mutating to factor
+  group_by(homeworld) %>%  #grouping
+  summarise(prop = n()/nrow(starwars)) %>%  # creating proportion label
+  mutate(
+    homeworld = forcats::fct_reorder(homeworld,prop, .desc = TRUE) #ordering data
+  ) %>% filter(prop > .02,
+               homeworld != "NA")  %>% 
+ mutate(col = case_when( # using case_when to set color rules to proportion
+   prop == max(prop) ~ "green4",
+   prop == min(prop) ~ "red4",
+   prop > min(prop) & prop <max(prop) ~ "gray60"
+ )
+ ) %>% 
+  ggplot(aes(x =prop, y = homeworld, fill = col)) + #here specifying we want color set by our colour rules
+  geom_col() +
+  geom_text(
+    aes(label = paste0(" ", sprintf("%0.1f",prop * 100), "%  "), 
+        color = prop > .10,  #changed rule
+        hjust = prop > .10), #changed rule
+    size = 4, fontface = "bold"
+  ) +
+  scale_x_continuous( 
+    expand = c(0, 0), limits = c(0, .13),  
+    labels = scales::label_percent(), 
+    name = "Proportion" 
+  ) +
+  scale_color_manual(
+    values = c("black", "white"),
+    guide = "none") +
+  scale_fill_identity(guide = "none") + # Setting guide to "none" to remove legend
+  facet_wrap(~ homeworld, ncol = 1, scales = "free_y")+
+  scale_y_discrete(guide = "none", 
+    expand = expansion(add = c(.6, .01)) 
+  ) +
+  theme(strip.text = element_text(
+    hjust = 0.03, margin = margin(1, 0, 1, 0), 
+    size = rel(1.1), face = "bold"
+  ))+
+   labs(title = "Our Pretty Barchart - Starwars Homeplanets")
+  
+fancy_plot
+```
+
+## Interactive Plots
+
+If you can make a ggplot, you can make an interactive plot with `plotly`. It's that easy. All you need to do is assign your plot to an object, and pipe it into the `ggplotly()` function.
+
+Note: Some more complex plot designs may not align well with plotly. But for the majority of the time, it will do what's needed, and provides a nice way to interact with our data visualisations.
+
+```{r}
+#step 1 - make your ggplot, and assign it to an object
+plot <- ggplot(data = iris,
+       aes(x = Sepal.Width, y = Petal.Length, color = Species)) +
+  geom_point()+
+  geom_smooth(method = "lm")
+
+#step 2 - use ggplotly() on your plot object
+ggplotly(plot)
+```
+
