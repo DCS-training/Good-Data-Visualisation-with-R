@@ -21,12 +21,6 @@ The **second session** focusses on some principles for using data visualisation 
   * Introduction to some more advanced visualisation possibilities
     
 
-The **third session** will cover the visualisation of textual data. Researchers often wish to work with unstructured text data, often collected from archives and the internet. We will discuss effective visualisation of this data, including: 
-
-   * Different types of plots and their areas of application 
-
-   * Plot design, common pitfalls, and what makes text data visualisation effective
-     
 *****
 
 The course will ultimately help to develop a foundational understanding of Visualisation in R. Crucially, this will foster a familiarity with the principles of data visualisation and the capabilities of the software, allowing attendees to confidently apply these, or indeed seek out new concepts for their current and future research. 
